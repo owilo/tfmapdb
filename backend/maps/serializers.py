@@ -20,3 +20,11 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = ['code', 'xml', 'embedding', 'author', 'category']
+
+class MinimalMapSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source='author.name', read_only=True)
+    category_id = serializers.IntegerField(source='category.id', read_only=True)
+
+    class Meta:
+        model = Map
+        fields = ['code', 'author_name', 'category_id']
