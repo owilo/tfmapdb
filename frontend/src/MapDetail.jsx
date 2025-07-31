@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
 
-export default function EntryPage() {
-  const { id } = useParams()
+export default function MapDetail() {
+  const { code } = useParams()
   const [entry, setEntry] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch(`/api/entry/${id}/`)
+    fetch(`/api/map/${code}/`)
       .then(res => {
         if (!res.ok) throw new Error(`Status ${res.status}`)
         return res.json()
@@ -22,7 +22,7 @@ export default function EntryPage() {
         setError('Could not load entry.')
         setLoading(false)
       })
-  }, [id])
+  }, [code])
 
   if (loading) return <p>Loading…</p>
   if (error)   return <p style={{ color: 'red' }}>{error}</p>
@@ -37,8 +37,9 @@ export default function EntryPage() {
       background: '#600'
     }}>
       <Link to="/">← Back</Link>
-      <h1>Entry #{entry.id}</h1>
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{entry.text}</p>
+      <h1>Entry #{entry.code}</h1>
+      <img src={`/api/map/${entry.code}/image.png`} alt="Map" />
+      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{entry.xml}</p>
     </div>
   )
 }

@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import App from './App'
-import EntryPage from './EntryPage'
+import MapDetail from './MapDetail'
 import './index.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -10,7 +10,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<App />} />
-        <Route path="entry/:id" element={<EntryPage />} />
+        <Route path="map/:code" element={<MapDetail />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
