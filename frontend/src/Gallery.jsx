@@ -7,7 +7,8 @@ export default function Gallery() {
   const [error, setError] = useState(null)
 
   useEffect(() => {
-    fetch('/api/')
+    const params = window.location.search;
+    fetch(`/api/gallery${params}`)
       .then(res => {
         if (!res.ok) throw new Error(`Status ${res.status}`)
         return res.json()
@@ -31,8 +32,8 @@ export default function Gallery() {
       {items.map(item => (
         <div key={item.code} style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
           <h3>{item.author_name}</h3>
-          <h3>P{item.category_id}</h3>
-          <h3>@{item.code}</h3>
+          <h4>@{item.code}</h4>
+          <h5>P{item.category_id}</h5>
           <img src={`/api/map/${item.code}/image.png`} alt="Map" style={{ width: '100%', borderRadius: '4px' }} />
           <Link to={`/map/${item.code}`}>View Details</Link>
         </div>

@@ -7,8 +7,22 @@ from django.shortcuts import get_object_or_404
 from PIL import Image, ImageDraw, ImageFont
 
 class MapListView(generics.ListAPIView):
-    queryset = Map.objects.all()
     serializer_class = MinimalMapSerializer
+
+    def get_queryset(self):
+        queryset = Map.objects.all()
+        author = self.request.GET.get('author', None)
+        if author:
+            queryset = queryset.filter(author__name=author)
+        category = self.request.GET.get('category', None)
+        if category:
+            queryset = queryset.filter(category__id=category)
+        sort = self.request.GET.get('sort', None)
+        if sort == 'asc': # Most recent first
+            queryset = queryset.order_by('code')
+        else:
+            queryset = queryset.order_by('-code')
+        return queryset
 
 class MapDetailView(generics.RetrieveAPIView):
     queryset = Map.objects.select_related('author', 'category')
