@@ -5,6 +5,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from PIL import Image, ImageDraw, ImageFont
+import re
 
 class MapListView(generics.ListAPIView):
     serializer_class = MinimalMapSerializer
@@ -13,14 +14,16 @@ class MapListView(generics.ListAPIView):
         queryset = Map.objects.all()
         author = self.request.GET.get('author', None)
         if author:
+            if not re.search(r'#\d{4}$', author):
+                author = f'{author}#0000'
             queryset = queryset.filter(author__name=author)
         category = self.request.GET.get('category', None)
         if category:
             queryset = queryset.filter(category__id=category)
         sort = self.request.GET.get('sort', None)
-        if sort == 'asc': # Most recent first
+        if sort == 'asc':
             queryset = queryset.order_by('code')
-        else:
+        else: # Most recent first
             queryset = queryset.order_by('-code')
         return queryset
 
@@ -36,7 +39,7 @@ class MapImageView(views.APIView):
         xml_text = map_obj.xml or ''
 
         width, height = 800, 400
-        image = Image.new('RGB', (width, height), 'white')
+        image = Image.new('RGB', (width, height), '#6a7495')
         draw = ImageDraw.Draw(image)
 
         font = ImageFont.load_default(size=18)
@@ -52,18 +55,20 @@ class MapImageView(views.APIView):
                 line_height = bbox[3] - bbox[1]
 
                 if line_width > width - 2 * margin:
-                    draw.text((margin, offset), current_line, font=font, fill='black')
+                    draw.text((margin, offset), current_line, font=font, fill='white')
                     offset += line_height + 2
                     current_line = f"{word} "
                 else:
                     current_line = test_line
 
             if current_line:
-                draw.text((margin, offset), current_line, font=font, fill='black')
+                draw.text((margin, offset), current_line, font=font, fill='white')
                 bbox = draw.textbbox((0, 0), current_line, font=font)
                 offset += (bbox[3] - bbox[1]) + 2
 
         buffer = BytesIO()
+        # Thumbnail
+        image.resize((200, 100), Image.Resampling.LANCZOS)
         image.save(buffer, format='PNG')
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import './Gallery.css'
 
 export default function Gallery() {
-  const [items, setItems] = useState([])
+  const [maps, setMaps] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
@@ -14,7 +15,7 @@ export default function Gallery() {
         return res.json()
       })
       .then(data => {
-        setItems(data)
+        setMaps(data)
         setLoading(false)
       })
       .catch(err => {
@@ -28,15 +29,20 @@ export default function Gallery() {
   if (error) return <p>{error}</p>
 
   return (
-    <div style={{ display: 'grid', gap: '1rem', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
-      {items.map(item => (
-        <div key={item.code} style={{ border: '1px solid #ccc', padding: '1rem', borderRadius: '8px' }}>
-          <h3>{item.author_name}</h3>
-          <h4>@{item.code}</h4>
-          <h5>P{item.category_id}</h5>
-          <img src={`/api/map/${item.code}/image.png`} alt="Map" style={{ width: '100%', borderRadius: '4px' }} />
-          <Link to={`/map/${item.code}`}>View Details</Link>
-        </div>
+    <div className='grid grid-cols-5 gap-4'>
+      {maps.map(map => (
+        <Link to={`/map/${map.code}`}>
+          <div key={map.code} className='bg-neutral-300 rounded-lg p-2 hover:brightness-110 transition duration-200'>
+            <div className='flex justify-between text-lg'>
+              <div>@{map.code}</div>
+              <div>P{map.category_id}</div>
+            </div>
+            
+            <img src={`/api/map/${map.code}/image.png`} alt="Map" className='w-full rounded-sm' />
+
+            <div className='text-sm text-neutral-800'>by {map.author_name}</div>  
+          </div>
+        </Link>
       ))}
     </div>
   )
