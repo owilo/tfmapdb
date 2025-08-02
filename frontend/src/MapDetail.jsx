@@ -1,5 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "./components/ui/collapsible";
+import './style/Gallery.css'
+import './style/animations.css'
+import XMLViewer from './XMLViewer';
 
 export default function MapDetail() {
   const { code } = useParams()
@@ -28,18 +36,36 @@ export default function MapDetail() {
   if (error)   return <p style={{ color: 'red' }}>{error}</p>
 
   return (
-    <div style={{
-      maxWidth: '600px',
-      margin: '2rem auto',
-      padding: '1.5rem',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-      borderRadius: '8px',
-      background: '#600'
-    }}>
+    <div className='w-2xl p-2 mx-auto bg-neutral-200'>
       <Link to="/">← Back</Link>
       <h1>Entry #{entry.code}</h1>
       <img src={`/api/map/${entry.code}/image.png`} alt="Map" />
-      <p style={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>{entry.xml}</p>
+
+      <div>
+        <Collapsible>
+          <CollapsibleTrigger
+            className="
+              px-4 py-1 w-full text-start 
+              bg-neutral-300 text-neutral-800 
+              rounded-t-sm 
+              rounded-b-sm 
+              data-[state=open]:rounded-b-none
+              hover:brightness-105 transition duration-200
+            "
+          >
+            XML
+          </CollapsibleTrigger>
+          <CollapsibleContent
+            className="
+              overflow-hidden transition-all 
+              data-[state=closed]:animate-collapsible-up 
+              data-[state=open]:animate-collapsible-down
+            "
+          >
+            <XMLViewer xml={entry.xml} />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
     </div>
   )
 }

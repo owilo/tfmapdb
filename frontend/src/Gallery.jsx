@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import './Gallery.css'
+import './style/Gallery.css'
 
 export default function Gallery() {
   const [maps, setMaps] = useState([])
