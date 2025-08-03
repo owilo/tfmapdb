@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { parse } from "txml";
 import { ChevronRight } from "lucide-react";
 import './style/main.css';

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Map, Author, Category
+from .map_data import extract_map_data
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -20,6 +21,18 @@ class MapSerializer(serializers.ModelSerializer):
     class Meta:
         model = Map
         fields = ['code', 'xml', 'embedding', 'author', 'category']
+
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        grounds_count, objects_count, joints_count = extract_map_data(instance.xml)
+        data.update({
+            'map_data':{
+                'grounds_count': grounds_count,
+                'objects_count': objects_count,
+                'joints_count': joints_count,
+            }
+        })
+        return data
 
 class MinimalMapSerializer(serializers.ModelSerializer):
     author_name = serializers.CharField(source='author.name', read_only=True)

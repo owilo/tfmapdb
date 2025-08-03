@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './style/main.css'
+import Searchbar from './Searchbar'
 
 export default function Gallery() {
   const [maps, setMaps] = useState([])
@@ -29,21 +30,24 @@ export default function Gallery() {
   if (error) return <p>{error}</p>
 
   return (
-    <div className='grid grid-cols-5 gap-4'>
-      {maps.map(map => (
-        <Link to={`/map/${map.code}`}>
-          <div key={map.code} className='bg-neutral-300 rounded-lg p-2 hover:brightness-110 transition duration-200'>
-            <div className='flex justify-between text-lg'>
-              <div>@{map.code}</div>
-              <div>P{map.category_id}</div>
-            </div>
-            
-            <img src={`/api/map/${map.code}/image.png`} alt="Map" className='w-full rounded-sm' />
+    <>
+      <Searchbar />
+      <div className='grid grid-cols-5 gap-4'>
+        {maps.map(map => (
+          <Link to={`/map/${map.code}`}>
+            <div key={map.code} className='bg-neutral-300 rounded-lg p-2 hover:brightness-110 transition duration-200'>
+              <div className='flex justify-between text-lg'>
+                <div>@{map.code}</div>
+                <div>P{map.category_id}</div>
+              </div>
+              
+              <img src={`/api/map/${map.code}/image.png`} alt="Map" className='w-full rounded-sm' />
 
-            <div className='text-sm text-neutral-800'>by {map.author_name}</div>  
-          </div>
-        </Link>
-      ))}
-    </div>
+              <div className='text-sm text-neutral-800'>by {map.author_name}</div>  
+            </div>
+          </Link>
+        ))}
+      </div>
+    </>
   )
 }
