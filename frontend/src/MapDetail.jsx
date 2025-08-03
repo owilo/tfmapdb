@@ -8,6 +8,7 @@ import {
 import './style/Gallery.css'
 import './style/animations.css'
 import XMLViewer from './XMLViewer';
+import clsx from 'clsx';
 
 export default function MapDetail() {
   const { code } = useParams()
@@ -35,37 +36,37 @@ export default function MapDetail() {
   if (loading) return <p>Loading…</p>
   if (error)   return <p style={{ color: 'red' }}>{error}</p>
 
+  const headerStyle = `
+    px-4 py-1 w-full text-start 
+    bg-neutral-300 text-neutral-800 
+    rounded-t-sm 
+    rounded-b-sm 
+    data-[state=open]:rounded-b-none
+    hover:brightness-105 transition duration-200
+  `
+  const contentStyle = `
+    overflow-hidden transition-all 
+    data-[state=closed]:animate-collapsible-up 
+    data-[state=open]:animate-collapsible-down
+  `
+
   return (
     <div className='w-2xl p-2 mx-auto bg-neutral-200'>
-      <Link to="/">← Back</Link>
-      <h1>Entry #{entry.code}</h1>
-      <img src={`/api/map/${entry.code}/image.png`} alt="Map" />
+      <Link to="/gallery">← Back</Link>
+      <h1>Map @{entry.code}</h1>
+      <Collapsible defaultOpen>
+        <CollapsibleTrigger className={clsx(headerStyle)}>Image</CollapsibleTrigger>
+        <CollapsibleContent className={clsx(contentStyle)}>
+          <img src={`/api/map/${entry.code}/image.png`} alt="Map" />
+        </CollapsibleContent>
+      </Collapsible>
 
-      <div>
-        <Collapsible>
-          <CollapsibleTrigger
-            className="
-              px-4 py-1 w-full text-start 
-              bg-neutral-300 text-neutral-800 
-              rounded-t-sm 
-              rounded-b-sm 
-              data-[state=open]:rounded-b-none
-              hover:brightness-105 transition duration-200
-            "
-          >
-            XML
-          </CollapsibleTrigger>
-          <CollapsibleContent
-            className="
-              overflow-hidden transition-all 
-              data-[state=closed]:animate-collapsible-up 
-              data-[state=open]:animate-collapsible-down
-            "
-          >
-            <XMLViewer xml={entry.xml} />
-          </CollapsibleContent>
-        </Collapsible>
-      </div>
+      <Collapsible>
+        <CollapsibleTrigger className={clsx(headerStyle)}>XML</CollapsibleTrigger>
+        <CollapsibleContent className={clsx(contentStyle)}>
+          <XMLViewer xml={entry.xml} maxLines={15} indentSize={4} />
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   )
 }
