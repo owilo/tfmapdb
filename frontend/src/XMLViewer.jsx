@@ -1,7 +1,7 @@
 import React, { useState, useRef } from "react";
 import { parse } from "txml";
 import { ChevronRight } from "lucide-react";
-import './style/Gallery.css';
+import './style/main.css';
 
 function CollapseButton({ isOpen, onToggle }) {
   return (
@@ -96,7 +96,7 @@ export default function XMLViewer({ xml, theme = {}, indentSize = 4 }) {
             ))}
             <span className={cls.tagBracket}>&gt;</span>
             <span className="text-gray-400 select-none">
-              &nbsp;{children.length} child nodes&nbsp;
+              &nbsp;{children.length} item(s)&nbsp;
             </span>
             <span className={cls.tagBracket}>&lt;/</span>
             <span className={cls.tagName}>{node.tagName}</span>

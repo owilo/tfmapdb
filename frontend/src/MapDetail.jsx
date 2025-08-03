@@ -5,7 +5,7 @@ import {
   CollapsibleTrigger,
   CollapsibleContent,
 } from "./components/ui/collapsible";
-import './style/Gallery.css'
+import './style/main.css'
 import './style/animations.css'
 import XMLViewer from './XMLViewer';
 import clsx from 'clsx';
