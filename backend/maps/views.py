@@ -5,27 +5,93 @@ from io import BytesIO
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from PIL import Image, ImageDraw, ImageFont
+from django.db.models import Q
 import re
 
 class MapListView(generics.ListAPIView):
     serializer_class = MinimalMapSerializer
+    queryset = Map.objects.all()
 
     def get_queryset(self):
-        queryset = Map.objects.all()
-        author = self.request.GET.get('author', None)
-        if author:
-            if not re.search(r'#\d{4}$', author):
-                author = f'{author}#0000'
-            queryset = queryset.filter(author__name=author)
-        category = self.request.GET.get('category', None)
-        if category:
-            queryset = queryset.filter(category__id=category)
-        sort = self.request.GET.get('sort', None)
+        qs = super().get_queryset()
+        params = self.request.GET
+
+        # Split and classify includes/excludes
+        def split_terms(raw):
+            includes, excludes = [], []
+            for term in raw.split(','):
+                term = term.strip()
+                if not term:
+                    continue
+                if term.startswith('!'):
+                    excludes.append(term[1:])
+                else:
+                    includes.append(term)
+            return includes, excludes
+
+        # Authors
+        raw_authors = params.get('author', '')
+        if raw_authors:
+            inc_authors, exc_authors = split_terms(raw_authors)
+            author_q = Q()
+            # Include
+            for a in inc_authors:
+                # Ensure tag
+                if not re.search(r'#\d{4}$', a):
+                    a = f'{a}#0000'
+                author_q |= Q(author__name=a)
+            # Exclude
+            for a in exc_authors:
+                if not re.search(r'#\d{4}$', a):
+                    a = f'{a}#0000'
+                author_q &= ~Q(author__name=a)
+            qs = qs.filter(author_q)
+
+        # Range parser
+        def build_range_q(field_name, raw):
+            inc, exc = split_terms(raw)
+            q_obj = Q()
+            # lo-hi, -hi, lo- or single
+            def make_q(val):
+                if '-' in val:
+                    lo, hi = val.split('-', 1)
+                    lo = int(lo) if lo.strip() else None
+                    hi = int(hi) if hi.strip() else None
+                    sub = Q()
+                    if lo is not None:
+                        sub &= Q(**{f"{field_name}__gte": lo})
+                    if hi is not None:
+                        sub &= Q(**{f"{field_name}__lte": hi})
+                    return sub
+                else:
+                    return Q(**{field_name: int(val)})
+            # Includes
+            for term in inc:
+                q_obj |= make_q(term)
+            # Excludes
+            for term in exc:
+                q_obj &= ~make_q(term)
+            return q_obj
+
+        # Codes
+        raw_codes = params.get('code', '')
+        if raw_codes:
+            qs = qs.filter(build_range_q('code', raw_codes))
+
+        # Categories
+        raw_cats = params.get('category', '')
+        if raw_cats:
+            qs = qs.filter(build_range_q('category__id', raw_cats))
+
+        # Sorting
+        # TODO Maybe add more sorting options later
+        sort = params.get('sort', 'desc').lower()
         if sort == 'asc':
-            queryset = queryset.order_by('code')
-        else: # Most recent first
-            queryset = queryset.order_by('-code')
-        return queryset
+            qs = qs.order_by('code')
+        else:
+            qs = qs.order_by('-code')
+
+        return qs
 
 class MapDetailView(generics.RetrieveAPIView):
     queryset = Map.objects.select_related('author', 'category')
@@ -68,7 +134,7 @@ class MapImageView(views.APIView):
 
         buffer = BytesIO()
         # Thumbnail
-        image.resize((200, 100), Image.Resampling.LANCZOS)
+        image = image.resize((350, 175), Image.Resampling.LANCZOS)
         image.save(buffer, format='PNG')
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')

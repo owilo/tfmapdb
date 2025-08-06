@@ -57,7 +57,7 @@ export default function MapDetail() {
       <Collapsible defaultOpen>
         <CollapsibleTrigger className={clsx(headerStyle)}>Image</CollapsibleTrigger>
         <CollapsibleContent className={clsx(contentStyle)}>
-          <img src={`/api/map/${entry.code}/image.png`} alt="Map" />
+          <img className='w-full' src={`/api/map/${entry.code}/image.png`} alt="Map" loading="lazy" />
         </CollapsibleContent>
       </Collapsible>
 

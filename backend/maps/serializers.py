@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Map, Author, Category
-from .map_data import extract_map_data
+from .utils import extract_map_data
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
