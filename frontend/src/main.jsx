@@ -1,17 +1,20 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
-import Gallery from './Gallery'
-import MapDetail from './MapDetail'
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Layout from './Layout';
+import Gallery from './Gallery';
+import MapDetail from './MapDetail';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Navigate to="/gallery" replace />} />
-        <Route path="gallery/" element={<Gallery />} />
-        <Route path="map/:code" element={<MapDetail />} />
+        <Route element={<Layout />}>
+          <Route path="/" element={<Navigate to="/gallery" replace />} />
+          <Route path="gallery" element={<Gallery />} />
+          <Route path="map/:code" element={<MapDetail />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   </React.StrictMode>
-)
+);
