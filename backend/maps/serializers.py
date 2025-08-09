@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Map, Author, Category
 from .utils import extract_map_data
+from django.db.models import Count
 
 class AuthorSerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,3 +73,20 @@ class MinimalAuthorSerializer(serializers.ModelSerializer):
             'total_high_categories',
             'total_high_perms',
         )
+
+class AuthorDetailSerializer(serializers.ModelSerializer):
+    categories = serializers.ListField(read_only=True)
+
+    class Meta:
+        model = Author
+        fields = ('id', 'name', 'categories')
+
+    def to_representation(self, instance):
+        category_list = self.context.get('category_list')
+        if category_list is None:
+            counts = Map.objects.filter(author=instance).values('category_id').annotate(count=Count('code'))
+            category_list = [{'category': c['category_id'], 'count': c['count']} for c in counts]
+
+        data = super().to_representation(instance)
+        data['categories'] = category_list
+        return data

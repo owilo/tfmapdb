@@ -1,16 +1,16 @@
 import re
 from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
+from collections import defaultdict
 
 from django.db.models import Q, Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
-from rest_framework import views, generics
-from rest_framework.generics import ListAPIView
+from rest_framework import views, generics, response
 
 from .models import Map, Author
-from .serializers import MapSerializer, MinimalMapSerializer, MinimalAuthorSerializer, CATEGORIES_HIGH, CATEGORIES_LOW, CATEGORIES_DISC, CATEGORIES_STANDARD, CATEGORIES_UNUSED, CATEGORIES_BOOTCAMP
+from .serializers import MapSerializer, MinimalMapSerializer, MinimalAuthorSerializer, AuthorDetailSerializer, CATEGORIES_HIGH, CATEGORIES_LOW, CATEGORIES_DISC, CATEGORIES_STANDARD, CATEGORIES_UNUSED, CATEGORIES_BOOTCAMP
 
 map_code_regex = re.compile(r"^!?((@?\d+(-@?\d*)?)|(-@?\d+))$")
 author_regex = re.compile(r'^!?\+?[A-Za-z]\w*(?:#\d{4})?$', re.IGNORECASE)
@@ -222,7 +222,7 @@ class MapImageView(views.APIView):
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')
 
-class AuthorListView(ListAPIView):
+class AuthorListView(generics.ListAPIView):
     serializer_class = MinimalAuthorSerializer
     pagination_class = None  # TODO Later implement pagination
 
@@ -246,3 +246,52 @@ class AuthorListView(ListAPIView):
             qs = qs.filter(name__icontains=raw)
 
         return qs.order_by('id')
+
+class AuthorProfileView(generics.RetrieveAPIView):
+    serializer_class = AuthorDetailSerializer
+    lookup_field = 'name'
+    pagination_class = None
+
+    def get(self, request, name, *args, **kwargs):
+        author = get_object_or_404(Author, name=name)
+
+        counts_qs = (
+            Map.objects
+               .filter(author=author)
+               .values('category_id')
+               .annotate(count=Count('code'))
+        )
+        category_list = [
+            {'category': item['category_id'], 'count': item['count']}
+            for item in counts_qs
+        ]
+
+        category_index = {item['category']: item for item in category_list}
+
+        special_ids = set(CATEGORIES_HIGH) | set(CATEGORIES_BOOTCAMP) | {41}
+
+        codes_qs = (
+            Map.objects
+               .filter(author=author, category__id__in=special_ids)
+               .order_by('-code')
+               .values('category_id', 'code')
+        )
+
+        codes_by_cat = defaultdict(list)
+        for row in codes_qs:
+            cid = row['category_id']
+            if len(codes_by_cat[cid]) < 20:
+                codes_by_cat[cid].append(row['code'])
+
+        for cid, codes in codes_by_cat.items():
+            if cid in category_index:
+                category_index[cid]['codes'] = codes
+            else:
+                new_item = {'category': cid, 'count': len(codes), 'codes': codes}
+                category_list.append(new_item)
+                category_index[cid] = new_item
+
+        category_list.sort(key=lambda x: x['category'])
+
+        serializer = self.get_serializer(author, context={'category_list': category_list})
+        return response.Response(serializer.data)

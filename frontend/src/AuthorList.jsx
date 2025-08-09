@@ -38,8 +38,9 @@ export default function AuthorList() {
       <div className='mt-4 grid grid-cols-4 gap-4'>
         {authors.map(author => (
           <div key={author.name} className='bg-gray-300 rounded-lg shadow-lg px-1'>
-            <Link to={`/author/${author.name}`}><span className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>{author.name}</span></Link>
-
+            <div className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>
+              <Link to={`/author/${encodeURIComponent(author.name)}`}>{author.name}</Link>
+            </div>
             <div className='text-sm text-gray-600'>Maps:&nbsp;
               <Link to={`/gallery?s=${encodeURIComponent(author.name)}`}><span className='font-semibold'>{author.total_maps}</span></Link>
             </div>

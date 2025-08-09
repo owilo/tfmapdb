@@ -28,7 +28,7 @@ export default function MapDetail() {
       })
       .catch(err => {
         console.error(err)
-        setError('Could not load entry.')
+        setError('Could not load map detail.')
         setLoading(false)
       })
   }, [code])
@@ -52,7 +52,7 @@ export default function MapDetail() {
 
   return (
     <>
-      <title>{`@${entry.code}`}</title>
+      <title>{`@${code}`}</title>
       <meta name="author" content={entry.author.name} />
       <div className='w-2xl p-2 mx-auto bg-neutral-200'>
         <Link to="/gallery">← Back</Link>

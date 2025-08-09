@@ -1,6 +1,6 @@
 from django.urls import path
 from django.views.generic import RedirectView
-from .views import MapListView, MapDetailView, MapImageView, AuthorListView
+from .views import MapListView, MapDetailView, MapImageView, AuthorListView, AuthorProfileView
 
 urlpatterns = [
     path('', RedirectView.as_view(url='gallery/', permanent=False)),
@@ -8,4 +8,5 @@ urlpatterns = [
     path('map/<int:code>/', MapDetailView.as_view(), name='map-detail'),
     path('map/<int:code>/image.png', MapImageView.as_view(), name='map-image'),
     path('authors/', AuthorListView.as_view(), name='author-list'),
+    path('author/<str:name>/', AuthorProfileView.as_view(), name='author-profile'),
 ]
