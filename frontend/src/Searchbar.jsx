@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ChevronDown, Search } from 'lucide-react';
 import './style/main.css';
 
 const xmlPresencePattern = /<.*?>/;
@@ -63,20 +64,26 @@ export default function Searchbar() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full flex justify-center items-center p-4 bg-neutral-100 rounded-lg shadow-md"
+      className="w-full flex justify-center items-center p-3 bg-gray-700 rounded-md shadow-md"
     >
       <input
         value={search}
         onChange={e => setSearch(e.target.value)}
         type="text"
         placeholder="Search maps, authors, categories..."
-        className="w-full px-4 py-2 border border-neutral-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="flex-1 px-4 py-1 border bg-white border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
-        type="submit"
-        className="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+        type="button"
+        className="ml-2 px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors flex items-center cursor-pointer"
       >
-        Search
+        <ChevronDown size="1.5em" className="mr-1" /> Options
+      </button>
+      <button
+        type="submit"
+        className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center cursor-pointer"
+      >
+        <Search size="1.5em" />
       </button>
     </form>
   );

@@ -9,19 +9,19 @@ export default function Sidebar() {
           <Map size='1em' />
           <span>Gallery</span>
         </Link>
-        <Link to="/gallery" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
+        <Link to="/authors" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
           <Users size='1em' />
           <span>Authors</span>
         </Link>
-        <Link to="/gallery" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
+        <Link to="/categories" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
           <Tag size='1em' />
           <span>Categories</span>
         </Link>
-        <Link to="/gallery" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
+        <Link to="/leaderboards" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
           <List size='1em' />
           <span>Leaderboards</span>
         </Link>
-        <Link to="/gallery" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
+        <Link to="/contests" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
           <History size='1em' />
           <span>Contest history</span>
         </Link>

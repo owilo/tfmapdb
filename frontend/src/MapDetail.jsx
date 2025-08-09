@@ -51,22 +51,26 @@ export default function MapDetail() {
   `
 
   return (
-    <div className='w-2xl p-2 mx-auto bg-neutral-200'>
-      <Link to="/gallery">← Back</Link>
-      <h1>Map @{entry.code}</h1>
-      <Collapsible defaultOpen>
-        <CollapsibleTrigger className={clsx(headerStyle)}>Image</CollapsibleTrigger>
-        <CollapsibleContent className={clsx(contentStyle)}>
-          <img className='w-full' src={`/api/map/${entry.code}/image.png`} alt="Map" loading="lazy" />
-        </CollapsibleContent>
-      </Collapsible>
+    <>
+      <title>{`@${entry.code}`}</title>
+      <meta name="author" content={entry.author.name} />
+      <div className='w-2xl p-2 mx-auto bg-neutral-200'>
+        <Link to="/gallery">← Back</Link>
+        <h1>Map @{entry.code}</h1>
+        <Collapsible defaultOpen>
+          <CollapsibleTrigger className={clsx(headerStyle)}>Image</CollapsibleTrigger>
+          <CollapsibleContent className={clsx(contentStyle)}>
+            <img className='w-full' src={`/api/map/${entry.code}/image.png`} alt="Map" loading="lazy" />
+          </CollapsibleContent>
+        </Collapsible>
 
-      <Collapsible>
-        <CollapsibleTrigger className={clsx(headerStyle)}>XML</CollapsibleTrigger>
-        <CollapsibleContent className={clsx(contentStyle)}>
-          <XMLViewer xml={entry.xml} maxLines={15} indentSize={4} />
-        </CollapsibleContent>
-      </Collapsible>
-    </div>
+        <Collapsible>
+          <CollapsibleTrigger className={clsx(headerStyle)}>XML</CollapsibleTrigger>
+          <CollapsibleContent className={clsx(contentStyle)}>
+            <XMLViewer xml={entry.xml} indentSize={4} />
+          </CollapsibleContent>
+        </Collapsible>
+      </div>
+    </>
   )
 }

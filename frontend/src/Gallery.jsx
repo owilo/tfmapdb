@@ -31,21 +31,23 @@ export default function Gallery() {
 
   return (
     <>
-      <Searchbar />
-      <div className='grid grid-cols-5 gap-4'>
+      <title>Map gallery</title>
+      <div className="sticky top-0 z-10">
+        <Searchbar />
+      </div>
+      <div className='mt-4 grid grid-cols-5 gap-4'>
         {maps.map(map => (
-          <Link to={`/map/${map.code}`}>
-            <div key={map.code} className='bg-neutral-200 rounded-lg shadow-md p-2 hover:brightness-105 transition duration-200'>
-              <div className='flex justify-between text-lg'>
-                <div>@{map.code}</div>
-                <div>P{map.category_id}</div>
-              </div>
-              
-              <img src={`/api/map/${map.code}/image.png`} alt="Map" className='w-full rounded-sm' loading="lazy" />
-
-              <div className='text-sm text-neutral-800'>by {map.author_name}</div>  
+          <div key={map.code} className='bg-gray-300 rounded-lg shadow-lg px-1'>
+            <div className='flex justify-between'>
+              <div className='font-semibold text-gray-800'>@{map.code}</div>
+              <div>P{map.category_id}</div>
             </div>
-          </Link>
+            <Link to={`/map/${map.code}`}>
+              <img src={`/api/map/${map.code}/image.png`} alt="Map" className='w-full rounded-sm hover:brightness-110 transition duration-200' loading="lazy" />
+            </Link>
+
+            <div className='text-sm text-gray-600'>by <Link to={`/author/${map.author_name}`}><span className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>{map.author_name}</span></Link></div>  
+          </div>
         ))}
       </div>
     </>

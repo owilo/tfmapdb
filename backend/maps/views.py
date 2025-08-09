@@ -1,12 +1,17 @@
-from rest_framework import views, generics
-from .models import Map
-from .serializers import MapSerializer, MinimalMapSerializer
+import re
 from io import BytesIO
+from PIL import Image, ImageDraw, ImageFont
+
+from django.db.models import Q, Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from PIL import Image, ImageDraw, ImageFont
-from django.db.models import Q
-import re
+
+from rest_framework import views, generics
+from rest_framework.generics import ListAPIView
+from rest_framework.permissions import AllowAny
+
+from .models import Map, Author
+from .serializers import MapSerializer, MinimalMapSerializer, MinimalAuthorSerializer, HIGH_CATEGORIES
 
 class MapListView(generics.ListAPIView):
     serializer_class = MinimalMapSerializer
@@ -99,6 +104,7 @@ class MapDetailView(generics.RetrieveAPIView):
     lookup_field = 'code'
 
 class MapImageView(views.APIView):
+    # TODO Generate actual map images
     def get(self, request, code, format=None):
         map_obj = get_object_or_404(Map, code=code)
 
@@ -138,3 +144,21 @@ class MapImageView(views.APIView):
         image.save(buffer, format='PNG')
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')
+
+class AuthorListView(ListAPIView):
+    serializer_class = MinimalAuthorSerializer
+    pagination_class = None # TODO Later implement pagination
+
+    def get_queryset(self):
+        return Author.objects.annotate(
+            total_maps=Count('maps'),
+            total_high_categories=Count(
+                'maps__category',
+                filter=Q(maps__category__id__in=HIGH_CATEGORIES),
+                distinct=True
+            ),
+            total_high_perms=Count(
+                'maps',
+                filter=Q(maps__category__id__in=HIGH_CATEGORIES)
+            )
+        ).order_by('id')
