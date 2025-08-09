@@ -8,10 +8,21 @@ from django.shortcuts import get_object_or_404
 
 from rest_framework import views, generics
 from rest_framework.generics import ListAPIView
-from rest_framework.permissions import AllowAny
 
 from .models import Map, Author
-from .serializers import MapSerializer, MinimalMapSerializer, MinimalAuthorSerializer, HIGH_CATEGORIES
+from .serializers import MapSerializer, MinimalMapSerializer, MinimalAuthorSerializer, CATEGORIES_HIGH, CATEGORIES_LOW, CATEGORIES_DISC, CATEGORIES_STANDARD, CATEGORIES_UNUSED, CATEGORIES_BOOTCAMP
+
+map_code_regex = re.compile(r"^!?((@?\d+(-@?\d*)?)|(-@?\d+))$")
+author_regex = re.compile(r'^!?\+?[A-Za-z]\w*(?:#\d{4})?$', re.IGNORECASE)
+category_regex = re.compile(r"^!?[Pp#]((\d+(-\d*)?)|(-\d+))$", re.IGNORECASE)
+
+# TODO Too many regexes, refactor later
+category_high_regex = re.compile(r"^!?[Pp#]h(igh)?$", re.IGNORECASE)
+category_low_regex = re.compile(r"^!?[Pp#]l(ow)?$", re.IGNORECASE)
+category_disc_regex = re.compile(r"^!?[Pp#]d(isc(ussion)?)?$", re.IGNORECASE)
+category_standard_regex = re.compile(r"^!?[Pp#]s(tandard)?$", re.IGNORECASE)
+category_unused_regex = re.compile(r"^!?[Pp#]u(nused)?$", re.IGNORECASE)
+category_bootcamp_regex = re.compile(r"^!?[Pp#]b(c|ootcamp)?$", re.IGNORECASE)
 
 class MapListView(generics.ListAPIView):
     serializer_class = MinimalMapSerializer
@@ -21,75 +32,140 @@ class MapListView(generics.ListAPIView):
         qs = super().get_queryset()
         params = self.request.GET
 
-        # Split and classify includes/excludes
-        def split_terms(raw):
-            includes, excludes = [], []
-            for term in raw.split(','):
-                term = term.strip()
-                if not term:
-                    continue
-                if term.startswith('!'):
-                    excludes.append(term[1:])
+        raw = params.get('s', '').strip()
+        if not raw:
+            sort = params.get('sort', 'desc').lower()
+            if sort == 'asc':
+                return qs.order_by('code')
+            return qs.order_by('-code')
+
+        items = re.split(r'\s+', raw)
+
+        codes_tokens = []
+        authors_tokens = []
+        categories_tokens = []
+
+        for it in items:
+            if not it:
+                continue
+            if map_code_regex.match(it):
+                codes_tokens.append(it)
+            elif category_regex.match(it) or category_high_regex.match(it) or category_low_regex.match(it) or category_disc_regex.match(it) or category_standard_regex.match(it) or category_unused_regex.match(it) or category_bootcamp_regex.match(it):
+                categories_tokens.append(it)
+            elif author_regex.match(it):
+                authors_tokens.append(it)
+            else:
+                continue
+
+        def split_includes_excludes(tokens):
+            inc, exc = [], []
+            for t in tokens:
+                if t.startswith('!'):
+                    exc.append(t[1:])
                 else:
-                    includes.append(term)
-            return includes, excludes
+                    inc.append(t)
+            return inc, exc
 
-        # Authors
-        raw_authors = params.get('author', '')
-        if raw_authors:
-            inc_authors, exc_authors = split_terms(raw_authors)
-            author_q = Q()
-            # Include
-            for a in inc_authors:
-                # Ensure tag
-                if not re.search(r'#\d{4}$', a):
-                    a = f'{a}#0000'
-                author_q |= Q(author__name=a)
-            # Exclude
-            for a in exc_authors:
-                if not re.search(r'#\d{4}$', a):
-                    a = f'{a}#0000'
-                author_q &= ~Q(author__name=a)
-            qs = qs.filter(author_q)
+        def build_range_q_for_tokens(field_name, tokens, is_category=False):
+            if not tokens:
+                return None
 
-        # Range parser
-        def build_range_q(field_name, raw):
-            inc, exc = split_terms(raw)
+            inc_terms, exc_terms = split_includes_excludes(tokens)
+
+            def term_to_q(term):
+                norm = term.lstrip('@Pp#')
+                if not norm:
+                    return None
+                
+                if norm in ['h', 'high']:
+                    return Q(category__id__in=CATEGORIES_HIGH)
+                if norm in ['l', 'low']:
+                    return Q(category__id__in=CATEGORIES_LOW)
+                if norm in ['d', 'disc', 'discussion']:
+                    return Q(category__id__in=CATEGORIES_DISC)
+                if norm in ['s', 'standard']:
+                    return Q(category__id__in=CATEGORIES_STANDARD)
+                if norm in ['u', 'unused']:
+                    return Q(category__id__in=CATEGORIES_UNUSED)
+
+                if '-' in norm:
+                    lo, hi = norm.split('-', 1)
+                    lo = lo.strip()
+                    hi = hi.strip()
+                    q_sub = Q()
+                    if lo != '':
+                        try:
+                            q_sub &= Q(**{f"{field_name}__gte": int(lo)})
+                        except ValueError:
+                            return None
+                    if hi != '':
+                        try:
+                            q_sub &= Q(**{f"{field_name}__lte": int(hi)})
+                        except ValueError:
+                            return None
+                    return q_sub
+                else:
+                    try:
+                        return Q(**{field_name: int(norm)})
+                    except ValueError:
+                        return None
+
             q_obj = Q()
-            # lo-hi, -hi, lo- or single
-            def make_q(val):
-                if '-' in val:
-                    lo, hi = val.split('-', 1)
-                    lo = int(lo) if lo.strip() else None
-                    hi = int(hi) if hi.strip() else None
-                    sub = Q()
-                    if lo is not None:
-                        sub &= Q(**{f"{field_name}__gte": lo})
-                    if hi is not None:
-                        sub &= Q(**{f"{field_name}__lte": hi})
-                    return sub
-                else:
-                    return Q(**{field_name: int(val)})
-            # Includes
-            for term in inc:
-                q_obj |= make_q(term)
-            # Excludes
-            for term in exc:
-                q_obj &= ~make_q(term)
+            any_inc = False
+            for t in inc_terms:
+                q = term_to_q(t)
+                if q is None:
+                    continue
+                any_inc = True
+                q_obj |= q
+
+            if not any_inc and not exc_terms:
+                return None
+
+            for t in exc_terms:
+                q = term_to_q(t)
+                if q is None:
+                    continue
+                q_obj &= ~q
+
             return q_obj
 
-        # Codes
-        raw_codes = params.get('code', '')
-        if raw_codes:
-            qs = qs.filter(build_range_q('code', raw_codes))
+        # Authors
+        if authors_tokens:
+            inc_authors, exc_authors = split_includes_excludes(authors_tokens)
+            author_q = Q()
+            any_inc = False
+            tag_re = re.compile(r'#\d{4}$')
+            for a in inc_authors:
+                name = a.capitalize()
+                if not tag_re.search(name):
+                    name = f'{name}#0000'
+                author_q |= Q(author__name=name)
+                any_inc = True
+
+            for a in exc_authors:
+                name = a.capitalize()
+                if name.startswith('+'):
+                    name = name[1:]
+                if not tag_re.search(name):
+                    name = f'{name}#0000'
+                author_q &= ~Q(author__name=name)
+
+            if any_inc or exc_authors:
+                qs = qs.filter(author_q)
+
+        # Map codes
+        codes_q = build_range_q_for_tokens('code', codes_tokens)
+        if codes_q is not None:
+            qs = qs.filter(codes_q)
 
         # Categories
-        raw_cats = params.get('category', '')
-        if raw_cats:
-            qs = qs.filter(build_range_q('category__id', raw_cats))
+        cats_q = build_range_q_for_tokens('category__id', categories_tokens, is_category=True)
+        if cats_q is not None:
+            qs = qs.filter(cats_q)
 
         # Sorting
-        # TODO Maybe add more sorting options later
+        # TODO Allow sorting by author, category, etc.
         sort = params.get('sort', 'desc').lower()
         if sort == 'asc':
             qs = qs.order_by('code')
@@ -154,11 +230,11 @@ class AuthorListView(ListAPIView):
             total_maps=Count('maps'),
             total_high_categories=Count(
                 'maps__category',
-                filter=Q(maps__category__id__in=HIGH_CATEGORIES),
+                filter=Q(maps__category__id__in=CATEGORIES_HIGH),
                 distinct=True
             ),
             total_high_perms=Count(
                 'maps',
-                filter=Q(maps__category__id__in=HIGH_CATEGORIES)
+                filter=Q(maps__category__id__in=CATEGORIES_HIGH)
             )
         ).order_by('id')

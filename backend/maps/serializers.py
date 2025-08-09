@@ -43,7 +43,6 @@ class MinimalMapSerializer(serializers.ModelSerializer):
         fields = ['code', 'author_name', 'category_id']
 
 class MinimalAuthorSerializer(serializers.ModelSerializer):
-    """Returns author name, and map count using a Django query for counting."""
     class Meta:
         model = Author
         fields = ['id', 'name', 'mapcount']
@@ -53,7 +52,12 @@ class MinimalAuthorSerializer(serializers.ModelSerializer):
         data['mapcount'] = instance.map_set.count()
         return data
 
-HIGH_CATEGORIES = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 24]
+CATEGORIES_HIGH = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 24]
+CATEGORIES_LOW = [1, 13]
+CATEGORIES_DISC = [20, 21, 23, 24, 32, 34, 38, 42]
+CATEGORIES_STANDARD = [0, 22, 43, 44]
+CATEGORIES_UNUSED = [2, 19]
+CATEGORIES_BOOTCAMP = [3, 13]
 
 class MinimalAuthorSerializer(serializers.ModelSerializer):
     total_maps = serializers.IntegerField(read_only=True)
