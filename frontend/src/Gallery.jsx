@@ -33,7 +33,7 @@ export default function Gallery() {
     <>
       <title>Map gallery</title>
       <div className="sticky top-0 z-10">
-        <Searchbar />
+        <Searchbar placeholder='Search maps' />
       </div>
       <div className='mt-4 grid grid-cols-5 gap-4'>
         {maps.map(map => (

@@ -33,12 +33,22 @@ export default function AuthorList() {
     <>
       <title>Map authors</title>
       <div className="sticky top-0 z-10">
-        <Searchbar />
+        <Searchbar placeholder='Search authors' />
       </div>
-      <div className='mt-4 grid grid-cols-5 gap-4'>
+      <div className='mt-4 grid grid-cols-4 gap-4'>
         {authors.map(author => (
           <div key={author.name} className='bg-gray-300 rounded-lg shadow-lg px-1'>
-            <span>{author.name}&nbsp;{author.total_maps}&nbsp;{author.total_high_categories}&nbsp;{author.total_high_perms}</span>
+            <Link to={`/author/${author.name}`}><span className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>{author.name}</span></Link>
+
+            <div className='text-sm text-gray-600'>Maps:&nbsp;
+              <Link to={`/gallery?s=${encodeURIComponent(author.name)}`}><span className='font-semibold'>{author.total_maps}</span></Link>
+            </div>
+            <div className='text-sm text-gray-600'>High perms:&nbsp;
+              <Link to={`/gallery?s=${encodeURIComponent(`${author.name} #h`)}`}><span className='font-semibold'>{author.total_high_perms}</span></Link>
+            </div>
+            <div className='text-sm text-gray-600'>High categories:&nbsp;
+              <span className='font-semibold'>{author.total_high_categories}</span>
+            </div>
           </div>
         ))}
       </div>

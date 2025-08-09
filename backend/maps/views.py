@@ -24,6 +24,8 @@ category_standard_regex = re.compile(r"^!?[Pp#]s(tandard)?$", re.IGNORECASE)
 category_unused_regex = re.compile(r"^!?[Pp#]u(nused)?$", re.IGNORECASE)
 category_bootcamp_regex = re.compile(r"^!?[Pp#]b(c|ootcamp)?$", re.IGNORECASE)
 
+tag_regex = re.compile(r'#\d{4}$')
+
 class MapListView(generics.ListAPIView):
     serializer_class = MinimalMapSerializer
     queryset = Map.objects.all()
@@ -130,25 +132,24 @@ class MapListView(generics.ListAPIView):
 
             return q_obj
 
+        def format_author_name(name):
+            name = a.capitalize()
+            if not tag_regex.search(name):
+                return f'{name}#0000'
+            return name
+
         # Authors
         if authors_tokens:
             inc_authors, exc_authors = split_includes_excludes(authors_tokens)
             author_q = Q()
             any_inc = False
-            tag_re = re.compile(r'#\d{4}$')
             for a in inc_authors:
-                name = a.capitalize()
-                if not tag_re.search(name):
-                    name = f'{name}#0000'
+                name = format_author_name(a)
                 author_q |= Q(author__name=name)
                 any_inc = True
 
             for a in exc_authors:
-                name = a.capitalize()
-                if name.startswith('+'):
-                    name = name[1:]
-                if not tag_re.search(name):
-                    name = f'{name}#0000'
+                name = format_author_name(a)
                 author_q &= ~Q(author__name=name)
 
             if any_inc or exc_authors:
@@ -223,10 +224,12 @@ class MapImageView(views.APIView):
 
 class AuthorListView(ListAPIView):
     serializer_class = MinimalAuthorSerializer
-    pagination_class = None # TODO Later implement pagination
+    pagination_class = None  # TODO Later implement pagination
 
     def get_queryset(self):
-        return Author.objects.annotate(
+        raw = self.request.GET.get('s', '').strip()
+
+        qs = Author.objects.annotate(
             total_maps=Count('maps'),
             total_high_categories=Count(
                 'maps__category',
@@ -237,4 +240,9 @@ class AuthorListView(ListAPIView):
                 'maps',
                 filter=Q(maps__category__id__in=CATEGORIES_HIGH)
             )
-        ).order_by('id')
+        )
+
+        if raw:
+            qs = qs.filter(name__icontains=raw)
+
+        return qs.order_by('id')

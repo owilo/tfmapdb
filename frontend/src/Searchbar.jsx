@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { ChevronDown, Search } from 'lucide-react';
 import './style/main.css';
 
-export default function Searchbar() {
+export default function Searchbar({ placeholder = "" }) {
   const location = useLocation();
 
   const getInitialFromUrl = () => {
@@ -51,8 +51,8 @@ export default function Searchbar() {
       <input
         value={search}
         onChange={e => setSearch(e.target.value)}
-        type="text"
-        placeholder="Search maps, authors, categories..."
+        type="search"
+        placeholder={placeholder}
         className="flex-1 px-4 py-1 border bg-white border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
       <button
