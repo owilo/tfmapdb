@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import './style/main.css'
 import Searchbar from './Searchbar'
-import CategoryIcon from './CategoryIcon'
 
 export default function AuthorList() {
   const [authors, setAuthors] = useState([])
@@ -48,17 +47,8 @@ export default function AuthorList() {
             <div className='text-sm text-gray-600'>High perms:&nbsp;
               <Link to={`/gallery?s=${encodeURIComponent(`${author.name} #h`)}`}><span className='font-semibold'>{author.total_high_perms}</span></Link>
             </div>
-            <div className='flex flex-wrap gap-1 my-1 text-sm text-gray-600'>
-              {author.high_categories.map(category => (
-                <Link
-                  key={category}
-                  to={`/category/${category}`}
-                  className="font-semibold text-gray-700 text-xs flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
-                >
-                  <CategoryIcon categoryId={category} />
-                  <span>P{category}</span>
-                </Link>
-              ))}
+            <div className='text-sm text-gray-600'>High categories:&nbsp;
+              <span className='font-semibold'>{author.total_high_categories}</span>
             </div>
           </div>
         ))}

@@ -6,6 +6,7 @@ import Gallery from './Gallery';
 import MapDetail from './MapDetail';
 import AuthorList from './AuthorList';
 import AuthorProfile from './AuthorProfile';
+import CategoriesList from './CategoriesList';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
@@ -17,6 +18,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="map/:code" element={<MapDetail />} />
           <Route path="authors" element={<AuthorList />} />
           <Route path="author/:name" element={<AuthorProfile />} />
+          <Route path="categories" element={<CategoriesList />} />
         </Route>
       </Routes>
     </BrowserRouter>

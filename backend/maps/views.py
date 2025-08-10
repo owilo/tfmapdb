@@ -222,17 +222,22 @@ class MapImageView(views.APIView):
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')
 
+# views.py
+from django.contrib.postgres.aggregates import ArrayAgg
+from django.db.models import Count, Q
+from rest_framework import generics
+
 class AuthorListView(generics.ListAPIView):
     serializer_class = MinimalAuthorSerializer
-    pagination_class = None  # TODO Later implement pagination
+    pagination_class = None
 
     def get_queryset(self):
         raw = self.request.GET.get('s', '').strip()
 
         qs = Author.objects.annotate(
             total_maps=Count('maps'),
-            total_high_categories=Count(
-                'maps__category',
+            high_categories=ArrayAgg(
+                'maps__category__id',
                 filter=Q(maps__category__id__in=CATEGORIES_HIGH),
                 distinct=True
             ),

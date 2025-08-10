@@ -59,7 +59,7 @@ export default function Searchbar({ placeholder = "" }) {
         type="button"
         className="ml-2 px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors flex items-center cursor-pointer"
       >
-        <ChevronDown size="1.5em" className="mr-1" /> Options
+        <ChevronDown size="1.5em" className="mr-1" /><span className="relative -top-px mr-1">Options</span>
       </button>
       <button
         type="submit"

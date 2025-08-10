@@ -60,19 +60,26 @@ CATEGORIES_STANDARD = [0, 22, 43, 44]
 CATEGORIES_UNUSED = [2, 19]
 CATEGORIES_BOOTCAMP = [3, 13]
 
+# serializers.py
+from rest_framework import serializers
+
 class MinimalAuthorSerializer(serializers.ModelSerializer):
     total_maps = serializers.IntegerField(read_only=True)
-    total_high_categories = serializers.IntegerField(read_only=True)
     total_high_perms = serializers.IntegerField(read_only=True)
+
+    high_categories = serializers.SerializerMethodField()
 
     class Meta:
         model = Author
         fields = (
             'name',
             'total_maps',
-            'total_high_categories',
+            'high_categories',
             'total_high_perms',
         )
+
+    def get_high_categories(self, obj):
+        return getattr(obj, 'high_categories') or []
 
 class AuthorDetailSerializer(serializers.ModelSerializer):
     categories = serializers.ListField(read_only=True)
