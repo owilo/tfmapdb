@@ -1,12 +1,12 @@
 import categories from './assets/categories.json'
 
-export default function CategoryIcon({ categoryId }) {
-  const iconPath = `/src/assets/category_icons/${categories[categories[categoryId] ? categoryId : "default"].image}.webp`;
+export default function CategoryIcon({ category }) {
+  const iconPath = `/src/assets/category_icons/${categories[categories[category] ? category : "default"].image}.webp`;
 
   return (
     <img
       src={iconPath}
-      alt={categoryId}
+      alt={category}
       className='h-[1em] align-middle select-none'
     />
   );

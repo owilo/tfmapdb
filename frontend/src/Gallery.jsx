@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import './style/main.css'
 import Searchbar from './Searchbar'
 import CategoryIcon from './CategoryIcon'
+import categories from './assets/categories.json'
 
 export default function Gallery() {
   const [maps, setMaps] = useState([])
@@ -41,9 +42,13 @@ export default function Gallery() {
           <div key={map.code} className='bg-gray-300 rounded-lg shadow-lg px-1'>
             <div className="flex justify-between items-center">
               <div className="font-semibold text-gray-800">@{map.code}</div>
-              <Link to={`/category/${map.category_id}`} className="font-semibold text-gray-700 text-xs flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer">
-                <CategoryIcon categoryId={map.category_id} />
-                <span>P{map.category_id}</span>
+              <Link
+                to={`/category/${map.category}`}
+                className="font-semibold text-gray-700 text-xs flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
+                title={categories[map.category]?.name || 'Unknown Category'}
+              >
+                <CategoryIcon category={map.category} />
+                <span>P{map.category}</span>
               </Link>
             </div>
             <Link to={`/map/${map.code}`}>

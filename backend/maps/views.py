@@ -80,15 +80,15 @@ class MapListView(generics.ListAPIView):
                     return None
                 
                 if norm in ['h', 'high']:
-                    return Q(category__id__in=CATEGORIES_HIGH)
+                    return Q(category__in=CATEGORIES_HIGH)
                 if norm in ['l', 'low']:
-                    return Q(category__id__in=CATEGORIES_LOW)
+                    return Q(category__in=CATEGORIES_LOW)
                 if norm in ['d', 'disc', 'discussion']:
-                    return Q(category__id__in=CATEGORIES_DISC)
+                    return Q(category__in=CATEGORIES_DISC)
                 if norm in ['s', 'standard']:
-                    return Q(category__id__in=CATEGORIES_STANDARD)
+                    return Q(category__in=CATEGORIES_STANDARD)
                 if norm in ['u', 'unused']:
-                    return Q(category__id__in=CATEGORIES_UNUSED)
+                    return Q(category__in=CATEGORIES_UNUSED)
 
                 if '-' in norm:
                     lo, hi = norm.split('-', 1)
@@ -161,7 +161,7 @@ class MapListView(generics.ListAPIView):
             qs = qs.filter(codes_q)
 
         # Categories
-        cats_q = build_range_q_for_tokens('category__id', categories_tokens, is_category=True)
+        cats_q = build_range_q_for_tokens('category', categories_tokens, is_category=True)
         if cats_q is not None:
             qs = qs.filter(cats_q)
 
@@ -176,7 +176,7 @@ class MapListView(generics.ListAPIView):
         return qs
 
 class MapDetailView(generics.RetrieveAPIView):
-    queryset = Map.objects.select_related('author', 'category')
+    queryset = Map.objects.select_related('author')
     serializer_class = MapSerializer
     lookup_field = 'code'
 
@@ -237,13 +237,13 @@ class AuthorListView(generics.ListAPIView):
         qs = Author.objects.annotate(
             total_maps=Count('maps'),
             high_categories=ArrayAgg(
-                'maps__category__id',
-                filter=Q(maps__category__id__in=CATEGORIES_HIGH),
+                'maps__category',
+                filter=Q(maps__category__in=CATEGORIES_HIGH),
                 distinct=True
             ),
             total_high_perms=Count(
                 'maps',
-                filter=Q(maps__category__id__in=CATEGORIES_HIGH)
+                filter=Q(maps__category__in=CATEGORIES_HIGH)
             )
         )
 
@@ -263,11 +263,11 @@ class AuthorProfileView(generics.RetrieveAPIView):
         counts_qs = (
             Map.objects
                .filter(author=author)
-               .values('category_id')
+               .values('category')
                .annotate(count=Count('code'))
         )
         category_list = [
-            {'category': item['category_id'], 'count': item['count']}
+            {'category': item['category'], 'count': item['count']}
             for item in counts_qs
         ]
 
@@ -277,14 +277,14 @@ class AuthorProfileView(generics.RetrieveAPIView):
 
         codes_qs = (
             Map.objects
-               .filter(author=author, category__id__in=special_ids)
+               .filter(author=author, category__in=special_ids)
                .order_by('-code')
-               .values('category_id', 'code')
+               .values('category', 'code')
         )
 
         codes_by_cat = defaultdict(list)
         for row in codes_qs:
-            cid = row['category_id']
+            cid = row['category']
             if len(codes_by_cat[cid]) < 20:
                 codes_by_cat[cid].append(row['code'])
 

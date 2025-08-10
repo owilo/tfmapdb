@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import './style/main.css'
 import Searchbar from './Searchbar'
 import CategoryIcon from './CategoryIcon'
+import categories from './assets/categories.json'
 
 export default function AuthorList() {
   const [authors, setAuthors] = useState([])
@@ -54,8 +55,9 @@ export default function AuthorList() {
                   key={category}
                   to={`/category/${category}`}
                   className="font-semibold text-gray-700 text-xs flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
+                  title={categories[category]?.name || 'Unknown Category'}
                 >
-                  <CategoryIcon categoryId={category} />
+                  <CategoryIcon category={category} />
                   <span>P{category}</span>
                 </Link>
               ))}
