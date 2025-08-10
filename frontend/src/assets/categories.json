@@ -1,0 +1,162 @@
+{
+    "default": {
+        "name": "Unknown",
+        "description": "none",
+        "image": "vanilla"
+    },
+    "vanilla": {
+        "name": "Vanilla",
+        "description": "none",
+        "image": "vanilla"
+    },
+    "0": {
+        "name": "Normal",
+        "description": "none",
+        "image": "0"
+    },
+    "1": {
+        "name": "Protected",
+        "description": "none",
+        "image": "1"
+    },
+    "2": {
+        "name": "Prime",
+        "description": "none",
+        "image": "2"
+    },
+    "3": {
+        "name": "Bootcamp",
+        "description": "none",
+        "image": "3"
+    },
+    "4": {
+        "name": "Shaman",
+        "description": "none",
+        "image": "4"
+    },
+    "5": {
+        "name": "Art",
+        "description": "none",
+        "image": "5"
+    },
+    "6": {
+        "name": "Mechanism",
+        "description": "none",
+        "image": "6"
+    },
+    "7": {
+        "name": "No Shaman",
+        "description": "none",
+        "image": "7"
+    },
+    "8": {
+        "name": "Dual Shaman",
+        "description": "none",
+        "image": "8"
+    },
+    "9": {
+        "name": "Miscellaneous",
+        "description": "none",
+        "image": "9"
+    },
+    "10": {
+        "name": "Survivor",
+        "description": "none",
+        "image": "10"
+    },
+    "11": {
+        "name": "Vampire Survivor",
+        "description": "none",
+        "image": "11"
+    },
+    "12": {
+        "name": "Mechanism without Shaman",
+        "description": "none",
+        "image": "6"
+    },
+    "13": {
+        "name": "Low-Bootcamp",
+        "description": "none",
+        "image": "13"
+    },
+    "17": {
+        "name": "Racing",
+        "description": "none",
+        "image": "17"
+    },
+    "18": {
+        "name": "Defilante",
+        "description": "none",
+        "image": "18"
+    },
+    "19": {
+        "name": "Music",
+        "description": "none",
+        "image": "19"
+    },
+    "20": {
+        "name": "Survivor Test",
+        "description": "none",
+        "image": "20"
+    },
+    "21": {
+        "name": "Vampire Test",
+        "description": "none",
+        "image": "21"
+    },
+    "22": {
+        "name": "Tribehouse",
+        "description": "none",
+        "image": "22"
+    },
+    "23": {
+        "name": "Bootcamp Test",
+        "description": "none",
+        "image": "23"
+    },
+    "24": {
+        "name": "Dual Shaman Survivor",
+        "description": "none",
+        "image": "24"
+    },
+    "32": {
+        "name": "Dual Shaman Test",
+        "description": "none",
+        "image": "32"
+    },
+    "34": {
+        "name": "Dual Shaman Survivor Test",
+        "description": "none",
+        "image": "34"
+    },
+    "38": {
+        "name": "Racing Test",
+        "description": "none",
+        "image": "17"
+    },
+    "41": {
+        "name": "Module",
+        "description": "none",
+        "image": "41"
+    },
+    "42": {
+        "name": "No Shaman Test",
+        "description": "none",
+        "image": "42"
+    },
+    "43": {
+        "name": "Inappropriate",
+        "description": "none",
+        "image": "44"
+    },
+    "44": {
+        "name": "Deleted",
+        "description": "none",
+        "image": "44"
+    },
+    "66": {
+        "name": "Thematic",
+        "description": "none",
+        "image": "66"
+    }
+}

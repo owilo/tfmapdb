@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import './style/main.css'
 import Searchbar from './Searchbar'
 
-export default function AuthorList() {
+export default function CategoriesList() {
   const [authors, setAuthors] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
