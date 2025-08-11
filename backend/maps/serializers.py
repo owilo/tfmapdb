@@ -14,7 +14,7 @@ class MapSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Map
-        fields = ['code', 'xml', 'embedding', 'author', 'category']
+        fields = ['code', 'xml', 'embedding', 'author', 'category', 'tags']
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { ArrowLeft, Image, BookOpen, Settings, ListCollapse, Book } from "lucide-react";
+import { ArrowLeft, Image, BookOpen, Settings, ListCollapse } from "lucide-react";
 import {
   Collapsible,
   CollapsibleTrigger,
@@ -10,6 +10,10 @@ import './style/main.css'
 import './style/animations.css'
 import XMLViewer from './XMLViewer';
 import clsx from 'clsx';
+import CategoryIcon from './CategoryIcon';
+import categories from './assets/categories.json';
+import tags from './assets/tags.json';
+import TagIcon from './TagIcon';
 
 export default function MapDetail() {
   const { code } = useParams()
@@ -88,7 +92,7 @@ export default function MapDetail() {
                     src={`/api/map/${map.code}/image.png`}
                     alt="Map"
                     loading="lazy"
-                    className="w-full object-contain bg-[#6a7495] max-h-[300px]"
+                    className="w-full object-contain bg-[#626b8a] max-h-[300px]"
                   />
                   {/*style={{ maxHeight: `${map.map_data.height}px` }}*/}
                 </div>
@@ -102,9 +106,40 @@ export default function MapDetail() {
               </CollapsibleTrigger>
               <CollapsibleContent className={clsx(contentStyle)}>
                 <ul>
-                  <li><span className='font-semibold'>Code:</span> @{map.code}</li>
-                  <li><span className='font-semibold'>Author:</span> {map.author.name}</li>
-                  <li><span className='font-semibold'>Category:</span> P{map.category}</li>
+                  <li><span className='font-semibold'>Code:</span>&nbsp;@{map.code}</li>
+                  <li>
+                    <span className='font-semibold'>Author:</span>&nbsp;
+                    <Link
+                      to={`/author/${encodeURIComponent(map.author_name)}`}
+                      className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'
+                    >
+                      {map.author.name}
+                    </Link>
+                  </li>
+                  <li className='flex items-center'>
+                    <span className='font-semibold'>Category:</span>&nbsp;
+                    <Link
+                      to={`/category/${map.category}`}
+                      className="font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
+                      title={categories[map.category]?.name || 'Unknown Category'}
+                    >
+                      <CategoryIcon category={map.category} />
+                      <span>P{map.category}</span>
+                    </Link>
+                  </li>
+                  {map.tags.length > 0 && <li className='flex items-center'>
+                    <span className='font-semibold'>Tags:</span>&nbsp;
+                    {map.tags.map(tag => (
+                      <Link
+                        to={`/gallery/?s=%24${tag}`}
+                        className="mr-1 font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
+                        title={tag}
+                      >
+                        <TagIcon tag={tag} />
+                        <span>{tags[tag]?.name || tag}</span>
+                      </Link>
+                    ))}
+                  </li>}
                 </ul>
               </CollapsibleContent>
             </Collapsible>
@@ -116,7 +151,7 @@ export default function MapDetail() {
               </CollapsibleTrigger>
               <CollapsibleContent className={clsx(contentStyle)}>
                 <ul>
-                  <li><span className='font-semibold'>Dimensions:</span> {map.map_data.length}&times;{map.map_data.height}</li>
+                  <li><span className='font-semibold'>Dimensions:</span>&nbsp;{map.map_data.length}&times;{map.map_data.height}</li>
                 </ul>
               </CollapsibleContent>
             </Collapsible>
@@ -128,10 +163,10 @@ export default function MapDetail() {
               </CollapsibleTrigger>
               <CollapsibleContent className={clsx(contentStyle)}>
                 <ul>
-                  <li><span className='font-semibold'>Grounds count:</span> {map.map_data.grounds_count}/60</li>
-                  <li><span className='font-semibold'>Decorations count:</span> {map.map_data.decorations_count}</li>
-                  <li><span className='font-semibold'>Objects count:</span> {map.map_data.objects_count}/40</li>
-                  <li><span className='font-semibold'>Joints count:</span> {map.map_data.joints_count}</li>
+                  <li><span className='font-semibold'>Grounds count:</span>&nbsp;{map.map_data.grounds_count}/60</li>
+                  <li><span className='font-semibold'>Decorations count:</span>&nbsp;{map.map_data.decorations_count}</li>
+                  <li><span className='font-semibold'>Objects count:</span>&nbsp;{map.map_data.objects_count}/40</li>
+                  <li><span className='font-semibold'>Joints count:</span>&nbsp;{map.map_data.joints_count}</li>
                 </ul>
               </CollapsibleContent>
             </Collapsible>
