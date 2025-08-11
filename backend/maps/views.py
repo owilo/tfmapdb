@@ -6,11 +6,13 @@ from collections import defaultdict
 from django.db.models import Q, Count
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from django.contrib.postgres.aggregates import ArrayAgg
 
 from rest_framework import views, generics, response
 
 from .models import Map, Author
-from .serializers import MapSerializer, MinimalMapSerializer, MinimalAuthorSerializer, AuthorDetailSerializer, CATEGORIES_HIGH, CATEGORIES_LOW, CATEGORIES_DISC, CATEGORIES_STANDARD, CATEGORIES_UNUSED, CATEGORIES_BOOTCAMP
+from .serializers import *
+from .constants import *
 
 map_code_regex = re.compile(r"^!?((@?\d+(-@?\d*)?)|(-@?\d+))$")
 author_regex = re.compile(r'^!?\+?[A-Za-z]\w*(?:#\d{4})?$', re.IGNORECASE)
@@ -222,11 +224,6 @@ class MapImageView(views.APIView):
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')
 
-# views.py
-from django.contrib.postgres.aggregates import ArrayAgg
-from django.db.models import Count, Q
-from rest_framework import generics
-
 class AuthorListView(generics.ListAPIView):
     serializer_class = MinimalAuthorSerializer
     pagination_class = None
@@ -236,9 +233,9 @@ class AuthorListView(generics.ListAPIView):
 
         qs = Author.objects.annotate(
             total_maps=Count('maps'),
-            high_categories=ArrayAgg(
+            category_tags=ArrayAgg(
                 'maps__category',
-                filter=Q(maps__category__in=CATEGORIES_HIGH),
+                filter=Q(maps__category__in=CATEGORIES_TAG),
                 distinct=True
             ),
             total_high_perms=Count(
@@ -300,3 +297,20 @@ class AuthorProfileView(generics.RetrieveAPIView):
 
         serializer = self.get_serializer(author, context={'category_list': category_list})
         return response.Response(serializer.data)
+
+class CategoriesListView(generics.ListAPIView):
+    serializer_class = CategoriesListSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = (
+            Map.objects
+            .values('category')
+            .annotate(
+                maps_count=Count('code', distinct=True),
+                authors_count=Count('author', distinct=True)
+            )
+            .order_by('category')
+        )
+
+        return qs

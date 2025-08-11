@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Map, Author
 from .utils import extract_map_data
+from .constants import *
 from django.db.models import Count
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -44,32 +45,24 @@ class MinimalAuthorSerializer(serializers.ModelSerializer):
         data['mapcount'] = instance.map_set.count()
         return data
 
-CATEGORIES_HIGH = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 17, 18, 19, 24]
-CATEGORIES_LOW = [1, 13]
-CATEGORIES_DISC = [20, 21, 23, 24, 32, 34, 38, 42]
-CATEGORIES_STANDARD = [0, 22, 43, 44]
-CATEGORIES_UNUSED = [2, 19]
-CATEGORIES_BOOTCAMP = [3, 13]
-
 class MinimalAuthorSerializer(serializers.ModelSerializer):
     total_maps = serializers.IntegerField(read_only=True)
     total_high_perms = serializers.IntegerField(read_only=True)
 
-    high_categories = serializers.SerializerMethodField()
+    category_tags = serializers.SerializerMethodField()
 
     class Meta:
         model = Author
         fields = (
             'name',
             'total_maps',
-            'high_categories',
+            'category_tags',
             'total_high_perms',
         )
 
-    def get_high_categories(self, obj):
-        return getattr(obj, 'high_categories') or []
+    def get_category_tags(self, obj):
+        return getattr(obj, 'category_tags') or []
 
-# todo fix
 class AuthorDetailSerializer(serializers.ModelSerializer):
     categories = serializers.ListField(read_only=True)
 
@@ -86,3 +79,8 @@ class AuthorDetailSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         data['categories'] = category_list
         return data
+
+class CategoriesListSerializer(serializers.Serializer):
+    category = serializers.IntegerField()
+    maps_count = serializers.IntegerField()
+    authors_count = serializers.IntegerField()

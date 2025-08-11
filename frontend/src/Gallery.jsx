@@ -37,9 +37,9 @@ export default function Gallery() {
       <div className="sticky top-0 z-10">
         <Searchbar placeholder='Search maps' />
       </div>
-      <div className='mt-4 grid grid-cols-5 gap-4'>
+      <div className='mt-3 grid grid-cols-5 gap-3'>
         {maps.map(map => (
-          <div key={map.code} className='bg-gray-300 rounded-lg shadow-lg px-1'>
+          <div key={map.code} className='bg-gray-300 rounded-lg shadow-lg px-1 truncate border-gray-400 border-2'>
             <div className="flex justify-between items-center">
               <div className="font-semibold text-gray-800">@{map.code}</div>
               <Link

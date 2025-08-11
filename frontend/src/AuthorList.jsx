@@ -37,9 +37,9 @@ export default function AuthorList() {
       <div className="sticky top-0 z-10">
         <Searchbar placeholder='Search authors' />
       </div>
-      <div className='mt-4 grid grid-cols-4 gap-4'>
+      <div className='mt-3 grid grid-cols-4 gap-3'>
         {authors.map(author => (
-          <div key={author.name} className='bg-gray-300 rounded-lg shadow-lg px-1'>
+          <div key={author.name} className='bg-gray-300 rounded-lg shadow-lg px-1 truncate border-gray-400 border-2'>
             <div className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>
               <Link to={`/author/${encodeURIComponent(author.name)}`}>{author.name}</Link>
             </div>
@@ -50,7 +50,7 @@ export default function AuthorList() {
               <Link to={`/gallery?s=${encodeURIComponent(`${author.name} #h`)}`}><span className='font-semibold'>{author.total_high_perms}</span></Link>
             </div>
             <div className='flex flex-wrap gap-1 my-1 text-sm text-gray-600'>
-              {author.high_categories.map(category => (
+              {author.category_tags.map(category => (
                 <Link
                   key={category}
                   to={`/category/${category}`}
