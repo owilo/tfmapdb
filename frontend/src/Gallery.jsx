@@ -55,7 +55,7 @@ export default function Gallery() {
               <img src={`/api/map/${map.code}/image.png`} alt="Map" className='w-full rounded-sm hover:brightness-110 transition duration-200' loading="lazy" />
             </Link>
 
-            <div className='text-sm text-gray-600'>by <Link to={`/author/${map.author_name}`}><span className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>{map.author_name}</span></Link></div>  
+            <div className='text-sm text-gray-600'>by <Link to={`/author/${encodeURIComponent(map.author_name)}`}><span className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>{map.author_name}</span></Link></div>  
           </div>
         ))}
       </div>

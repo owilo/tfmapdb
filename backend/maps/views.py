@@ -219,7 +219,7 @@ class MapImageView(views.APIView):
 
         buffer = BytesIO()
         # Thumbnail
-        image = image.resize((350, 175), Image.Resampling.LANCZOS)
+        #image = image.resize((350, 175), Image.Resampling.LANCZOS)
         image.save(buffer, format='PNG')
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')

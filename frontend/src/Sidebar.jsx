@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { Map, Users, Tag, List, History } from 'lucide-react'
+import { Map, Users, Tag, Puzzle, List, History } from 'lucide-react'
 
 export default function Sidebar() {
   return (
@@ -16,6 +16,10 @@ export default function Sidebar() {
         <Link to="/categories" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
           <Tag size='1em' />
           <span className="relative -top-px">Categories</span>
+        </Link>
+        <Link to="/modules" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
+          <Puzzle size='1em' />
+          <span className="relative -top-px">Modules</span>
         </Link>
         <Link to="/leaderboards" className="flex items-center space-x-2 px-3 py-2 rounded hover:bg-gray-700">
           <List size='1em' />

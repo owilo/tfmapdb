@@ -18,13 +18,9 @@ class MapSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         data = super().to_representation(instance)
-        grounds_count, objects_count, joints_count = extract_map_data(instance.xml)
+        map_data = extract_map_data(instance.xml)
         data.update({
-            'map_data':{
-                'grounds_count': grounds_count,
-                'objects_count': objects_count,
-                'joints_count': joints_count,
-            }
+            'map_data': map_data
         })
         return data
 

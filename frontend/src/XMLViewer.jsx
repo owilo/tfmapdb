@@ -61,7 +61,7 @@ export default function XMLViewer({ xml, theme = {}, indentSize = 4 }) {
   fullRows.forEach((row, idx) => (row.lineNumber = idx + 1));
 
   const defaultTheme = {
-    container: "bg-gray-50 p-2 font-mono text-sm overflow-auto",
+    container: "bg-gray-50 p-2 font-mono text-xs overflow-auto",
     lineNumber: "min-w-8 max-w-8 inline-block text-gray-400 select-none",
     tagBracket: "text-blue-500",
     tagName: "text-purple-600",
@@ -84,7 +84,9 @@ export default function XMLViewer({ xml, theme = {}, indentSize = 4 }) {
     if (type === "open" && elementCount > 0 && !isOpen) {
       lines.push(
         <div key={`${path}-collapsed`} className="flex whitespace-nowrap">
-          <span className={cls.lineNumber}>{lineNumber}</span>
+          <div className="flex items-center">
+            <span className={cls.lineNumber}>{lineNumber}</span>
+          </div>
           <div className="flex items-center" style={paddingStyle}>
             <CollapseButton isOpen={false} onToggle={() => toggle(path)} />
             <span className={cls.tagBracket}>&lt;</span>
@@ -114,7 +116,9 @@ export default function XMLViewer({ xml, theme = {}, indentSize = 4 }) {
     if (type === "open") {
       lines.push(
         <div key={`${path}-open`} className="flex whitespace-nowrap">
-          <span className={cls.lineNumber}>{lineNumber}</span>
+          <div className="flex items-center">
+            <span className={cls.lineNumber}>{lineNumber}</span>
+          </div>
           <div className="flex items-center" style={paddingStyle}>
             {elementCount > 0 ? (
               <CollapseButton isOpen={isOpen} onToggle={() => toggle(path)} />
@@ -138,7 +142,9 @@ export default function XMLViewer({ xml, theme = {}, indentSize = 4 }) {
     else if (type === "text") {
       lines.push(
         <div key={path} className="flex whitespace-nowrap">
-          <span className={cls.lineNumber}>{lineNumber}</span>
+          <div className="flex items-center">
+            <span className={cls.lineNumber}>{lineNumber}</span>
+          </div>
           <div className="flex items-center" style={paddingStyle}>
             <span className="inline-block w-6 h-6 mr-1" />
             <span className={cls.textNode}>{text}</span>
@@ -151,7 +157,9 @@ export default function XMLViewer({ xml, theme = {}, indentSize = 4 }) {
     else if (type === "close" && elementCount > 0 && isOpen) {
       lines.push(
         <div key={`${path}-close`} className="flex whitespace-nowrap">
-          <span className={cls.lineNumber}>{lineNumber}</span>
+          <div className="flex items-center">
+            <span className={cls.lineNumber}>{lineNumber}</span>
+          </div>
           <div className="flex items-center" style={paddingStyle}>
             <span className="inline-block w-6 h-6 mr-1" />
             <span className={cls.tagBracket}>&lt;/</span>
