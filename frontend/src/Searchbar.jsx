@@ -1,6 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { ChevronDown, Search } from 'lucide-react';
+import { Tag, Puzzle, ChevronDown, Search } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuPortal,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "./components/ui/dropdown-menu";
+import categories from './assets/categories.json';
+import tags from './assets/tags.json';
+import CategoryIcon from './CategoryIcon';
+import TagIcon from './TagIcon';
 import './style/main.css';
 
 export default function Searchbar({ placeholder = "" }) {
@@ -43,30 +61,117 @@ export default function Searchbar({ placeholder = "" }) {
     window.location.href = `${location.pathname}${qs ? `?${qs}` : ''}`;
   };
 
+  const categoriesToDisplay = [
+    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 17, 18, 19, 20, 21, 22, 23, 24, 32, 34, 38, 41, 42, 44, 66
+  ];
+
+  const tagsToDisplay = [
+    "hc", "div"
+  ];
+
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="w-full flex justify-center items-center p-3 bg-gray-700 rounded-md shadow-md"
-    >
-      <input
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        type="search"
-        placeholder={placeholder}
-        className="flex-1 px-4 py-1 border bg-white border-gray-400 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-      <button
-        type="button"
-        className="ml-2 px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600 transition-colors flex items-center cursor-pointer"
+    <div className='w-full'>
+      <form
+        onSubmit={handleSubmit}
+        className="flex justify-center items-center p-2 bg-gray-700 rounded-xl shadow-md"
       >
-        <ChevronDown size="1.5em" className="mr-1" /><span className="relative -top-px mr-1">Options</span>
-      </button>
-      <button
-        type="submit"
-        className="ml-2 px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors flex items-center cursor-pointer"
-      >
-        <Search size="1.5em" />
-      </button>
-    </form>
+        <input
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          type="search"
+          placeholder={placeholder}
+          className="flex-1 px-4 py-1 border bg-white border-gray-400 rounded-lg rounded-r-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button
+          type="submit"
+          className="px-3 py-1 bg-[#4667cf] text-white rounded-lg rounded-l-none flex items-center cursor-pointer hover:brightness-110 transition duration-200"
+        >
+          <Search size="1.5em" />
+        </button>
+      </form>
+      {/*<div className="mx-2 flex items-center justify-center gap-10 text-gray-800 text-sm">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className='bg-gray-300 rounded-md px-2 py-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
+              <Tag size="1.15em" className='inline' />
+              <span className='relative -top-px'>Categories</span>
+              <ChevronDown size="1.25em" className="inline" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="start">
+            {categoriesToDisplay.map(category => (
+              <DropdownMenuItem title={categories[category]?.description}>
+                <CategoryIcon category={category} />
+                {categories[category]?.name}
+              </DropdownMenuItem>
+            ))}*/}
+            {/*<DropdownMenuLabel className="font-semibold">My Account</DropdownMenuLabel>
+            <DropdownMenuGroup>
+              <DropdownMenuItem>
+                Profile
+                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Billing
+                <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Settings
+                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem>
+                Keyboard shortcuts
+                <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuGroup>
+              <DropdownMenuItem>Team</DropdownMenuItem>
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
+                <DropdownMenuPortal>
+                  <DropdownMenuSubContent>
+                    <DropdownMenuItem>Email</DropdownMenuItem>
+                    <DropdownMenuItem>Message</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>More...</DropdownMenuItem>
+                  </DropdownMenuSubContent>
+                </DropdownMenuPortal>
+              </DropdownMenuSub>
+              <DropdownMenuItem>
+                New Team
+                <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>GitHub</DropdownMenuItem>
+            <DropdownMenuItem>Support</DropdownMenuItem>
+            <DropdownMenuItem disabled>API</DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              Log out
+              <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
+            </DropdownMenuItem>*/}
+          {/*</DropdownMenuContent>
+        </DropdownMenu>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button className='bg-gray-300 rounded-md px-2 py-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
+              <Puzzle size="1.15em" className='inline' />
+              <span className='relative -top-px'>Tags</span>
+              <ChevronDown size="1.25em" className="inline" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-64" align="start">
+            {tagsToDisplay.map(tag => (
+              <DropdownMenuItem title={tags[tag]?.description}>
+                <TagIcon tag={tag} />
+                {tags[tag]?.name}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>*/}
+    </div>
   );
 }

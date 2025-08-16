@@ -8,7 +8,7 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.postgres.aggregates import ArrayAgg
 
-from rest_framework import views, generics, response
+from rest_framework import views, generics, response, status
 
 from .models import Map, Author
 from .serializers import *
@@ -28,6 +28,7 @@ category_bootcamp_regex = re.compile(r"^!?[Pp#]b(c|ootcamp)?$", re.IGNORECASE)
 
 tag_regex = re.compile(r'#\d{4}$')
 
+# TODO Split in multiple files
 class MapListView(generics.ListAPIView):
     serializer_class = MinimalMapSerializer
     queryset = Map.objects.all()
@@ -314,3 +315,82 @@ class CategoriesListView(generics.ListAPIView):
         )
 
         return qs
+
+
+class LeaderboardView(views.APIView):
+    def get(self, request, *args, **kwargs):
+
+        def group_distinct_counts(rows, count_key, top_k):
+            rows_sorted = sorted(rows, key=lambda r: (-r[count_key], r['id']))
+
+            buckets = []
+            seen_counts = 0
+            last_count = None
+
+            for r in rows_sorted:
+                cnt = r[count_key]
+                if cnt == 0:
+                    continue
+                if last_count is None or cnt != last_count:
+                    if seen_counts >= top_k:
+                        break
+                    buckets.append([{'id': r['id'], 'name': r['name'], 'count': cnt}])
+                    seen_counts += 1
+                    last_count = cnt
+                else:
+                    buckets[-1].append({'id': r['id'], 'name': r['name'], 'count': cnt})
+            return buckets
+
+
+        annotations = {
+            'total_count': Count('maps'),
+        }
+
+        annotations['total_high_count'] = Count(
+            'maps',
+            filter=Q(maps__category__in=CATEGORIES_HIGH)
+        )
+        annotations['categories_count'] = Count(
+            'maps__category',
+            distinct=True,
+            filter=Q(maps__category__in=CATEGORIES_HIGH)
+        )
+
+        # Per-category counts
+        for cat in CATEGORIES_HIGH:
+            annotations[f'cat_{cat}'] = Count(
+                'maps',
+                filter=Q(maps__category=cat)
+            )
+        """else:
+            annotations['total_high_count'] = Count('maps', filter=Q(pk__isnull=True))
+            annotations['categories_count'] = Count('maps__category', distinct=True, filter=Q(pk__isnull=True))"""
+
+        author_qs = Author.objects.annotate(**annotations).values(
+            'id', 'name', *annotations.keys()
+        )
+
+        authors = list(author_qs)
+
+        result = {}
+
+        # Per-category top-5
+        for cat in CATEGORIES_HIGH:
+            key = f'cat_{cat}'
+            rows = [{'id': a['id'], 'name': a['name'], key: a.get(key, 0)} for a in authors]
+            for r in rows:
+                r['count_metric'] = r[key]
+            buckets = group_distinct_counts(rows, count_key='count_metric', top_k=5)
+            if buckets:
+                result[str(cat)] = buckets
+
+        rows_all = [{'id': a['id'], 'name': a['name'], 'count_metric': a.get('total_high_count', 0)} for a in authors]
+        result['all'] = group_distinct_counts(rows_all, count_key='count_metric', top_k=5)
+
+        rows_cat = [{'id': a['id'], 'name': a['name'], 'count_metric': a.get('categories_count', 0)} for a in authors]
+        result['cat'] = group_distinct_counts(rows_cat, count_key='count_metric', top_k=5)
+
+        rows_total = [{'id': a['id'], 'name': a['name'], 'count_metric': a.get('total_count', 0)} for a in authors]
+        result['total'] = group_distinct_counts(rows_total, count_key='count_metric', top_k=10)
+
+        return response.Response(result, status=status.HTTP_200_OK)

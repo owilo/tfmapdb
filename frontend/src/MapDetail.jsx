@@ -164,7 +164,7 @@ export default function MapDetail() {
               <CollapsibleContent className={clsx(contentStyle)}>
                 <ul>
                   <li><span className='font-semibold'>Grounds count:</span>&nbsp;{map.map_data.grounds_count}/60</li>
-                  <li><span className='font-semibold'>Decorations count:</span>&nbsp;{map.map_data.decorations_count}</li>
+                  <li><span className='font-semibold'>Decorations count:</span>&nbsp;{map.map_data.decorations_count}/50</li>
                   <li><span className='font-semibold'>Objects count:</span>&nbsp;{map.map_data.objects_count}/40</li>
                   <li><span className='font-semibold'>Joints count:</span>&nbsp;{map.map_data.joints_count}</li>
                 </ul>
