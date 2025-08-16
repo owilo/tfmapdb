@@ -3,14 +3,14 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from collections import defaultdict
 
-from django.db.models import Q, Count
+from django.db.models import Q, Count, Sum
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.postgres.aggregates import ArrayAgg
 
 from rest_framework import views, generics, response, status
 
-from .models import Map, Author
+from .models import Map, Author, AuthorCategoryCounter, AuthorTagCounter
 from .serializers import *
 from .constants import *
 
@@ -250,6 +250,7 @@ class AuthorListView(generics.ListAPIView):
 
         return qs.order_by('id')
 
+
 class AuthorProfileView(generics.RetrieveAPIView):
     serializer_class = AuthorDetailSerializer
     lookup_field = 'name'
@@ -341,56 +342,65 @@ class LeaderboardView(views.APIView):
                     buckets[-1].append({'id': r['id'], 'name': r['name'], 'count': cnt})
             return buckets
 
-
-        annotations = {
-            'total_count': Count('maps'),
-        }
-
-        annotations['total_high_count'] = Count(
-            'maps',
-            filter=Q(maps__category__in=CATEGORIES_HIGH)
-        )
-        annotations['categories_count'] = Count(
-            'maps__category',
-            distinct=True,
-            filter=Q(maps__category__in=CATEGORIES_HIGH)
-        )
-
-        # Per-category counts
-        for cat in CATEGORIES_HIGH:
-            annotations[f'cat_{cat}'] = Count(
-                'maps',
-                filter=Q(maps__category=cat)
-            )
-        """else:
-            annotations['total_high_count'] = Count('maps', filter=Q(pk__isnull=True))
-            annotations['categories_count'] = Count('maps__category', distinct=True, filter=Q(pk__isnull=True))"""
-
-        author_qs = Author.objects.annotate(**annotations).values(
-            'id', 'name', *annotations.keys()
-        )
-
-        authors = list(author_qs)
-
         result = {}
 
         # Per-category top-5
         for cat in CATEGORIES_HIGH:
-            key = f'cat_{cat}'
-            rows = [{'id': a['id'], 'name': a['name'], key: a.get(key, 0)} for a in authors]
-            for r in rows:
-                r['count_metric'] = r[key]
-            buckets = group_distinct_counts(rows, count_key='count_metric', top_k=5)
+            qs = (
+                AuthorCategoryCounter.objects
+                .filter(category=cat)
+                .select_related('author')
+                .values('author_id', 'author__name', 'map_count')
+                .order_by('-map_count', 'author_id')
+            )
+            rows = [{'id': r['author_id'], 'name': r['author__name'], 'count': r['map_count']} for r in qs]
+            buckets = group_distinct_counts(rows, count_key='count', top_k=5)
             if buckets:
                 result[str(cat)] = buckets
 
-        rows_all = [{'id': a['id'], 'name': a['name'], 'count_metric': a.get('total_high_count', 0)} for a in authors]
-        result['all'] = group_distinct_counts(rows_all, count_key='count_metric', top_k=5)
+        # 2) "all": Top-5 authors by sum(map_count) across high categories
+        qs_all = (
+            AuthorCategoryCounter.objects
+            .filter(category__in=CATEGORIES_HIGH)
+            .values('author_id', 'author__name')
+            .annotate(count=Sum('map_count'))
+            .order_by('-count', 'author_id')
+        )
 
-        rows_cat = [{'id': a['id'], 'name': a['name'], 'count_metric': a.get('categories_count', 0)} for a in authors]
-        result['cat'] = group_distinct_counts(rows_cat, count_key='count_metric', top_k=5)
+        rows_all = [
+            {'id': r['author_id'], 'name': r['author__name'], 'count': r['count'] or 0}
+            for r in qs_all
+        ]
 
-        rows_total = [{'id': a['id'], 'name': a['name'], 'count_metric': a.get('total_count', 0)} for a in authors]
-        result['total'] = group_distinct_counts(rows_total, count_key='count_metric', top_k=10)
+        result['all'] = group_distinct_counts(rows_all, 'count', top_k=5)
 
-        return response.Response(result, status=status.HTTP_200_OK)
+        # 3) "cat": Top-5 authors by number of distinct high categories they have
+        qs_cat = (
+            AuthorCategoryCounter.objects
+            .filter(category__in=CATEGORIES_HIGH)
+            .values('author_id', 'author__name')
+            .annotate(count=Count('category', distinct=True))
+            .order_by('-count', 'author_id')
+        )
+
+        rows_cat = [
+            {'id': r['author_id'], 'name': r['author__name'], 'count': r['count'] or 0}
+            for r in qs_cat
+        ]
+        result['cat'] = group_distinct_counts(rows_cat, 'count', top_k=5)
+
+        # 4) "total": Top-10 authors by total maps across all categories
+        qs_total = (
+            AuthorCategoryCounter.objects
+            .values('author_id', 'author__name')
+            .annotate(count=Sum('map_count'))
+            .order_by('-count', 'author_id')
+        )
+
+        rows_total = [
+            {'id': r['author_id'], 'name': r['author__name'], 'count': r['count'] or 0}
+            for r in qs_total
+        ]
+        result['total'] = group_distinct_counts(rows_total, 'count', top_k=10)
+
+        return response.Response(result)
