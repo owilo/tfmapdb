@@ -2,7 +2,7 @@ import categories from './assets/categories.json'
 
 export default function CategoryIcon({ category, className = '', ...props }) {
   const iconName = categories[categories[category] ? category : 'default'].image;
-  const iconPath = `/src/assets/category_icons/${iconName}.webp`;
+  const iconPath = `/src/assets/tag_icons/${iconName}`;
 
   return (
     <img

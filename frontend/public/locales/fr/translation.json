@@ -1,0 +1,91 @@
+{
+  "navigation": {
+    "gallery": "Galerie",
+    "authors": "Auteurs",
+    "categories": "Catégories",
+    "modules": "Modules",
+    "leaderboards": "Classements",
+    "contest_history": "Concours",
+    "back_to_gallery": "Retour à la galerie"
+  },
+  "search": {
+    "placeholder_map": "Rechercher des cartes",
+    "placeholder_author": "Rechercher des auteurs",
+    "placeholder_category": "Rechercher des catégories, modules ou tags"
+  },
+  "gallery": {
+    "title": "Galerie de cartes",
+    "search_placeholder": "Rechercher des cartes",
+    "by_user": "par <0>{{user}}</0>"
+  },
+  "author_list": {
+    "title": "Auteurs de cartes",
+    "search_placeholder": "Rechercher des auteurs",
+    "maps_info": "Cartes :",
+    "high_perm_info": "Cartes hautes :"
+  },
+  "categories_list": {
+    "title": "Catégories de cartes",
+    "search_placeholder": "Rechercher des catégories, modules ou tags"
+  },
+  "map": {
+    "image": "Image de la carte",
+    "details": "Détails de la carte",
+    "properties": "Propriétés de la carte",
+    "content": "Contenu de la carte",
+    "code": "Code :",
+    "name": "Name :",
+    "author": "Auteur :",
+    "category": "Catégorie :",
+    "tags": "Tags :",
+    "dimensions": "Dimensions :",
+    "grounds_count": "Nombre de sols :",
+    "decorations_count": "Nombre de décorations :",
+    "objects_count": "Nombre d'objets :",
+    "joints_count": "Nombre de joints :"
+  },
+  "categories": {
+    "unknown": "Inconnu",
+    "vanilla": "Vanilla",
+    "normal": "Normal",
+    "protected": "Protégé",
+    "prime": "Prime",
+    "bootcamp": "Bootcamp",
+    "shaman": "Chamane",
+    "art": "Art",
+    "mechanism": "Mécanisme",
+    "no_shaman": "Sans Chamane",
+    "dual_shaman": "Deux Chamanes",
+    "miscellaneous": "Divers",
+    "survivor": "Survivor",
+    "vampire_survivor": "Survivor Vampire",
+    "mechanism_no_shaman": "Mécanisme sans Chamane",
+    "low_bootcamp": "Bootcamp de Basse Qualité",
+    "racing": "Racing",
+    "defilante": "Défilante",
+    "music": "Musique",
+    "survivor_test": "Test Survivor",
+    "vampire_test": "Test Vampire",
+    "tribehouse": "Maison de Tribu",
+    "bootcamp_test": "Test Bootcamp",
+    "dual_shaman_survivor": "Survivor Deux Chamanes",
+    "dual_shaman_test": "Test Deux Chamanes",
+    "dual_shaman_survivor_test": "Test Survivor Deux Chamanes",
+    "racing_storage": "Stockage Racing",
+    "module": "Module",
+    "no_shaman_test": "Test Sans Chamane",
+    "inappropriate": "Inapproprié",
+    "deleted": "Supprimé",
+    "thematic": "Thématique"
+  },
+  "modules": {
+    "hardcamp": "Hardcamp",
+    "divinity": "Divinity"
+  },
+  "info": {
+    "map_count": "<0>{{count}}</0> carte",
+    "map_count_other": "<0>{{count}}</0> cartes",
+    "author_count": "<0>{{count}}</0> auteur",
+    "author_count_other": "<0>{{count}}</0> auteurs"
+  }
+}

@@ -1,162 +1,138 @@
 {
     "default": {
-        "name": "Unknown",
-        "description": "none",
-        "image": "vanilla"
+        "name": "categories.unknown",
+        "image": "official/vanilla.webp"
     },
     "vanilla": {
-        "name": "Vanilla",
-        "description": "Vanilla maps.",
-        "image": "vanilla"
+        "name": "categories.vanilla",
+        "image": "official/vanilla.webp"
     },
     "0": {
-        "name": "Normal",
-        "description": "Plays in Normal rooms. Costs cheese when exporting. Players can vote if they liked the map at the end of the round. If the score goes below 50%, the map is deleted.",
-        "image": "0"
+        "name": "categories.normal",
+        "image": "official/0.webp"
     },
     "1": {
-        "name": "Protected",
-        "description": "Plays in Normal rooms. Cannot be edited.",
-        "image": "1"
+        "name": "categories.protected",
+        "image": "official/1.webp"
     },
     "2": {
-        "name": "Prime",
-        "description": "No longer used.",
-        "image": "2"
+        "name": "categories.prime",
+        "image": "official/2.webp"
     },
     "3": {
-        "name": "Bootcamp",
-        "description": "Plays in Bootcamp rooms. High quality bootcamp.",
-        "image": "3"
+        "name": "categories.bootcamp",
+        "image": "official/3.webp"
     },
     "4": {
-        "name": "Shaman",
-        "description": "Plays in Normal rooms.",
-        "image": "4"
+        "name": "categories.shaman",
+        "image": "official/4.webp"
     },
     "5": {
-        "name": "Art",
-        "description": "Plays in Normal rooms.",
-        "image": "5"
+        "name": "categories.art",
+        "image": "official/5.webp"
     },
     "6": {
-        "name": "Mechanism",
-        "description": "Plays in Normal rooms.",
-        "image": "6"
+        "name": "categories.mechanism",
+        "image": "official/6.webp"
     },
     "7": {
-        "name": "No Shaman",
-        "description": "Plays in Normal rooms.",
-        "image": "7"
+        "name": "categories.no_shaman",
+        "image": "official/7.webp"
     },
     "8": {
-        "name": "Dual Shaman",
-        "description": "Plays in Normal rooms.",
-        "image": "8"
+        "name": "categories.dual_shaman",
+        "image": "official/8.webp"
     },
     "9": {
-        "name": "Miscellaneous",
-        "description": "Plays in Normal rooms.",
-        "image": "9"
+        "name": "categories.miscellaneous",
+        "image": "official/9.webp"
     },
     "10": {
-        "name": "Survivor",
-        "description": "Plays in Survivor rooms.",
-        "image": "10"
+        "name": "categories.survivor",
+        "image": "official/10.webp"
     },
     "11": {
-        "name": "Vampire Survivor",
-        "description": "Plays in Survivor rooms.",
-        "image": "11"
+        "name": "categories.vampire_survivor",
+        "image": "official/11.webp"
     },
     "12": {
-        "name": "Mechanism without Shaman",
-        "description": "Plays in Normal rooms, every two P6 maps.",
-        "image": "6"
+        "name": "categories.mechanism_no_shaman",
+        "image": "official/6.webp"
     },
     "13": {
-        "name": "Low-Bootcamp",
-        "description": "Plays in Bootcamp rooms. Low quality bootcamp.",
-        "image": "13"
+        "name": "categories.low_bootcamp",
+        "image": "official/13.webp"
     },
     "17": {
-        "name": "Racing",
-        "description": "Plays in Racing rooms.",
-        "image": "17"
+        "name": "categories.racing",
+        "image": "official/17.webp"
     },
     "18": {
-        "name": "Defilante",
-        "description": "Plays in Defilante rooms.",
-        "image": "18"
+        "name": "categories.defilante",
+        "image": "official/18.webp"
     },
     "19": {
-        "name": "Music",
-        "description": "No longer used.",
-        "image": "19"
+        "name": "categories.music",
+        "image": "official/19.webp"
     },
     "20": {
-        "name": "Survivor Test",
-        "description": "Testing purposes only.",
-        "image": "20"
+        "name": "categories.survivor_test",
+        "image": "official/20.webp"
     },
     "21": {
-        "name": "Vampire Test",
-        "description": "Testing purposes only.",
-        "image": "21"
+        "name": "categories.vampire_test",
+        "image": "official/21.webp"
     },
     "22": {
-        "name": "Tribehouse",
-        "description": "Tribehouse maps.",
-        "image": "22"
+        "name": "categories.tribehouse",
+        "image": "official/22.webp"
     },
     "23": {
-        "name": "Bootcamp Test",
-        "description": "Testing purposes only.",
-        "image": "23"
+        "name": "categories.bootcamp_test",
+        "image": "official/23.webp"
     },
     "24": {
-        "name": "Dual Shaman Survivor",
-        "description": "Plays in Survivor rooms.",
-        "image": "24"
+        "name": "categories.dual_shaman_survivor",
+        "image": "official/24.webp"
     },
     "32": {
-        "name": "Dual Shaman Test",
-        "description": "Testing purposes only.",
-        "image": "32"
+        "name": "categories.dual_shaman_test",
+        "image": "official/32.webp"
     },
     "34": {
-        "name": "Dual Shaman Survivor Test",
-        "description": "Testing purposes only.",
-        "image": "34"
+        "name": "categories.dual_shaman_survivor_test",
+        "image": "official/34.webp"
     },
     "38": {
-        "name": "Racing Storage",
-        "description": "Sometimes used for map testing.",
-        "image": "17"
+        "name": "categories.racing_storage",
+        "image": "official/17.webp"
     },
     "41": {
-        "name": "Module",
-        "description": "Module maps.",
-        "image": "41"
+        "name": "categories.module",
+        "image": "official/41.webp"
     },
     "42": {
-        "name": "No Shaman Test",
-        "description": "Testing purposes only.",
-        "image": "42"
+        "name": "categories.no_shaman_test",
+        "image": "official/42.webp"
     },
     "43": {
-        "name": "Inappropriate",
-        "description": "Maps which broke the rules and were hidden.",
-        "image": "44"
+        "name": "categories.inappropriate",
+        "image": "official/44.webp"
     },
     "44": {
-        "name": "Deleted",
-        "description": "Maps which broke the rules.",
-        "image": "44"
+        "name": "categories.deleted",
+        "image": "official/44.webp"
     },
     "66": {
-        "name": "Thematic",
-        "description": "Plays in Normal rooms. Seasonally art themed maps.",
-        "image": "66"
+        "name": "categories.thematic",
+        "image": "official/66.webp"
+    },
+    "hc": {
+        "name": "modules.hardcamp",
+        "image": "modules/hardcamp.webp"
+    },
+    "div": {
+        "name": "modules.divinity",
+        "image": "modules/divinity.webp"
     }
 }

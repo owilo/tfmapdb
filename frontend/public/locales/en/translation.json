@@ -1,0 +1,86 @@
+{
+  "navigation": {
+    "gallery": "Gallery",
+    "authors": "Authors",
+    "categories": "Categories",
+    "modules": "Modules",
+    "leaderboards": "Leaderboards",
+    "contest_history": "Contest history",
+    "back_to_gallery": "Back to gallery"
+  },
+  "gallery": {
+    "title": "Map gallery",
+    "search_placeholder": "Search maps",
+    "by_user": "by <0>{{user}}</0>"
+  },
+  "author_list": {
+    "title": "Map authors",
+    "search_placeholder": "Search authors",
+    "maps_info": "Maps:",
+    "high_perm_info": "High perms:"
+  },
+  "categories_list": {
+    "title": "Map categories",
+    "search_placeholder": "Search categories, modules or tags"
+  },
+  "map": {
+    "image": "Map image",
+    "details": "Map details",
+    "properties": "Map properties",
+    "content": "Map content",
+    "code": "Code:",
+    "name": "Name:",
+    "author": "Author:",
+    "category": "Category:",
+    "tags": "Tags:",
+    "dimensions": "Dimensions:",
+    "grounds_count": "Grounds count:",
+    "decorations_count": "Decorations count:",
+    "objects_count": "Objects count:",
+    "joints_count": "Joints count:"
+  },
+  "categories": {
+    "unknown": "Unknown",
+    "vanilla": "Vanilla",
+    "normal": "Normal",
+    "protected": "Protected",
+    "prime": "Prime",
+    "bootcamp": "Bootcamp",
+    "shaman": "Shaman",
+    "art": "Art",
+    "mechanism": "Mechanism",
+    "no_shaman": "No Shaman",
+    "dual_shaman": "Dual Shaman",
+    "miscellaneous": "Miscellaneous",
+    "survivor": "Survivor",
+    "vampire_survivor": "Vampire Survivor",
+    "mechanism_no_shaman": "Mechanism without Shaman",
+    "low_bootcamp": "Low-Bootcamp",
+    "racing": "Racing",
+    "defilante": "Defilante",
+    "music": "Music",
+    "survivor_test": "Survivor Test",
+    "vampire_test": "Vampire Test",
+    "tribehouse": "Tribehouse",
+    "bootcamp_test": "Bootcamp Test",
+    "dual_shaman_survivor": "Dual Shaman Survivor",
+    "dual_shaman_test": "Dual Shaman Test",
+    "dual_shaman_survivor_test": "Dual Shaman Survivor Test",
+    "racing_storage": "Racing Storage",
+    "module": "Module",
+    "no_shaman_test": "No Shaman Test",
+    "inappropriate": "Inappropriate",
+    "deleted": "Deleted",
+    "thematic": "Thematic"
+  },
+  "modules": {
+    "hardcamp": "Hardcamp",
+    "divinity": "Divinity"
+  },
+  "info": {
+    "map_count_one": "<0>{{count}}</0> map",
+    "map_count_other": "<0>{{count}}</0> maps",
+    "author_count_one": "<0>{{count}}</0> author",
+    "author_count_other": "<0>{{count}}</0> authors"
+  }
+}

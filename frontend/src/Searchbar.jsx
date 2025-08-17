@@ -16,9 +16,9 @@ import {
   DropdownMenuTrigger,
 } from "./components/ui/dropdown-menu";
 import categories from './assets/categories.json';
-import tags from './assets/tags.json';
+//import tags from './assets/tags.json';
 import CategoryIcon from './CategoryIcon';
-import TagIcon from './TagIcon';
+//import TagIcon from './TagIcon';
 import './style/main.css';
 
 export default function Searchbar({ placeholder = "" }) {

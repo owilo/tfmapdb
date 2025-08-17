@@ -7,6 +7,7 @@ import MapDetail from './MapDetail';
 import AuthorList from './AuthorList';
 import AuthorProfile from './AuthorProfile';
 import CategoriesList from './CategoriesList';
+import "./i18n";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

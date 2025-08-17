@@ -4,8 +4,10 @@ import './style/main.css'
 import Searchbar from './Searchbar'
 import CategoryIcon from './CategoryIcon'
 import categories from './assets/categories.json'
+import { Trans, useTranslation } from 'react-i18next';
 
 export default function CategoriesList() {
+  const { t } = useTranslation();
   const [categoriesData, setCategories] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -33,9 +35,9 @@ export default function CategoriesList() {
 
   return (
     <>
-      <title>Map categories</title>
+      <title>{t("categories_list.title")}</title>
       <div className="sticky top-0 z-10">
-        <Searchbar placeholder='Search categories' />
+        <Searchbar placeholder={t("categories_list.search_placeholder")} />
       </div>
       <div className='mt-3 grid grid-cols-2 gap-3'>
         {categoriesData.map(categoryData => (
@@ -54,24 +56,36 @@ export default function CategoriesList() {
 
             <div className="flex flex-col">
               <span className='font-semibold'>
-                P{categoryData.category} &ndash; {categories[categoryData.category].name}
+                P{categoryData.category} &ndash; {t(categories[categoryData.category].name)}
               </span>
               <span className="text-sm text-gray-800">
-                <Link
-                  to={`/gallery?s=%23${categoryData.category}`}
-                  className='font-semibold'
-                >
-                  {categoryData.maps_count}
-                </Link> maps &ndash; <Link
-                  to={`/authors?s=%23${categoryData.category}`}
-                  className='font-semibold'
-                >
-                  {categoryData.authors_count}
-                </Link> authors
+                <Trans
+                  i18nKey="info.map_count"
+                  count={categoryData.maps_count}
+                  values={{ count: categoryData.maps_count }}
+                  components={[
+                    <Link
+                      to={`/gallery?s=%23${categoryData.category}`}
+                      className="font-semibold"
+                    />
+                  ]}
+                />
+                &nbsp;&ndash;&nbsp;
+                <Trans
+                  i18nKey="info.author_count"
+                  count={categoryData.authors_count}
+                  values={{ count: categoryData.authors_count }}
+                  components={[
+                    <Link
+                      to={`/authors?s=%23${categoryData.category}`}
+                      className="font-semibold"
+                    />
+                  ]}
+                />
               </span>
-              <span className="text-sm text-gray-600">
+              {/*<span className="text-sm text-gray-600">
                 {categories[categoryData.category].description}
-              </span>
+              </span>*/}
             </div>
           </div>
         ))}
