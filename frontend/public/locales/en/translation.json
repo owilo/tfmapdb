@@ -15,9 +15,7 @@
   },
   "author_list": {
     "title": "Map authors",
-    "search_placeholder": "Search authors",
-    "maps_info": "Maps:",
-    "high_perm_info": "High perms:"
+    "search_placeholder": "Search authors"
   },
   "categories_list": {
     "title": "Map categories",
@@ -80,6 +78,8 @@
   "info": {
     "map_count_one": "<0>{{count}}</0> map",
     "map_count_other": "<0>{{count}}</0> maps",
+    "high_perm_count_one": "<0>{{count}}</0> high perm",
+    "high_perm_count_other": "<0>{{count}}</0> high perms",
     "author_count_one": "<0>{{count}}</0> author",
     "author_count_other": "<0>{{count}}</0> authors"
   }

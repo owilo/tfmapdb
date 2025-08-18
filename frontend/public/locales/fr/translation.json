@@ -20,9 +20,7 @@
   },
   "author_list": {
     "title": "Auteurs de cartes",
-    "search_placeholder": "Rechercher des auteurs",
-    "maps_info": "Cartes :",
-    "high_perm_info": "Cartes hautes :"
+    "search_placeholder": "Rechercher des auteurs"
   },
   "categories_list": {
     "title": "Catégories de cartes",
@@ -85,6 +83,8 @@
   "info": {
     "map_count": "<0>{{count}}</0> carte",
     "map_count_other": "<0>{{count}}</0> cartes",
+    "high_perm_count_one": "<0>{{count}}</0> carte hautes",
+    "high_perm_count_other": "<0>{{count}}</0> cartes hautes",
     "author_count": "<0>{{count}}</0> auteur",
     "author_count_other": "<0>{{count}}</0> auteurs"
   }

@@ -4,7 +4,7 @@ import './style/main.css'
 import Searchbar from './Searchbar'
 import CategoryIcon from './CategoryIcon'
 import categories from './assets/categories.json'
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 
 export default function AuthorList() {
   const { t } = useTranslation();
@@ -39,18 +39,44 @@ export default function AuthorList() {
       <div className="sticky top-0 z-10">
         <Searchbar placeholder={t("author_list.search_placeholder")} />
       </div>
-      <div className='mt-3 grid grid-cols-4 gap-3'>
+      <div className='mt-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
         {authors.map(author => (
-          <div key={author.name} className='bg-gray-300 rounded-lg shadow-lg px-1 truncate border-gray-400 border-2'>
-            <div className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'>
+          <div
+            key={author.name}
+            className='bg-gray-200 rounded-sm shadow-lg px-2 py-1 truncate'
+          >
+            <div className='font-semibold text-sky-700 hover:text-sky-500 transition duration-200'>
               <Link to={`/author/${encodeURIComponent(author.name)}`}>{author.name}</Link>
             </div>
-            <div className='text-sm text-gray-600'>{t("author_list.maps_info")}&nbsp;
-              <Link to={`/gallery?s=${encodeURIComponent(author.name)}`}><span className='font-semibold'>{author.total_maps}</span></Link>
-            </div>
-            <div className='text-sm text-gray-600'>{t("author_list.high_perm_info")}&nbsp;
-              <Link to={`/gallery?s=${encodeURIComponent(`${author.name} #h`)}`}><span className='font-semibold'>{author.total_high_perms}</span></Link>
-            </div>
+
+            <hr class="border-1 border-t border-gray-400" />
+
+            <span className="text-sm text-gray-800">
+              <Trans
+                i18nKey="info.map_count"
+                count={author.total_maps}
+                values={{ count: author.total_maps }}
+                components={[
+                  <Link
+                    to={`/gallery?s=${encodeURIComponent(author.name)}`}
+                    className="font-semibold text-sky-900 hover:text-sky-700 transition duration-200"
+                  />
+                ]}
+              />
+              &nbsp;&ndash;&nbsp;
+              <Trans
+                i18nKey="info.high_perm_count"
+                count={author.total_high_perms}
+                values={{ count: author.total_high_perms }}
+                components={[
+                  <Link
+                    to={`/gallery?s=${encodeURIComponent(`${author.name} #h`)}`}
+                    className="font-semibold text-sky-900 hover:text-sky-700 transition duration-200"
+                  />
+                ]}
+              />
+            </span>
+
             <div className='flex flex-wrap gap-1 my-1 text-sm text-gray-600'>
               {author.category_tags.map(category => (
                 <Link
