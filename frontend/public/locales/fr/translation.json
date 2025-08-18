@@ -76,6 +76,19 @@
     "deleted": "Supprimé",
     "thematic": "Thématique"
   },
+  "supercategories": {
+    "normal": "Normal",
+    "tribehouse": "Maison de Tribu",
+    "deleted": "Supprimé",
+    "bootcamp": "Bootcamp",
+    "survivor": "Survivor",
+    "racing": "Racing",
+    "defilante": "Défilante",
+    "module": "Module",
+    "test": "Test",
+    "other": "Autre",
+    "module_tags": "Tous les modules"
+  },
   "modules": {
     "hardcamp": "Hardcamp",
     "divinity": "Divinity"

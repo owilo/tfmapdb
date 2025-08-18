@@ -300,23 +300,43 @@ class AuthorProfileView(generics.RetrieveAPIView):
         serializer = self.get_serializer(author, context={'category_list': category_list})
         return response.Response(serializer.data)
 
+from django.db.models import Sum, Count
+from rest_framework import generics
+
+from .models import AuthorCategoryCounter, AuthorTagCounter
+from .serializers import CategoriesListSerializer, TagsListSerializer
+
 class CategoriesListView(generics.ListAPIView):
     serializer_class = CategoriesListSerializer
     pagination_class = None
 
     def get_queryset(self):
         qs = (
-            Map.objects
+            AuthorCategoryCounter.objects
             .values('category')
             .annotate(
-                maps_count=Count('code', distinct=True),
+                maps_count=Sum('map_count'),
                 authors_count=Count('author', distinct=True)
             )
             .order_by('category')
         )
-
         return qs
 
+class TagsListView(generics.ListAPIView):
+    serializer_class = TagsListSerializer
+    pagination_class = None
+
+    def get_queryset(self):
+        qs = (
+            AuthorTagCounter.objects
+            .values('tag')
+            .annotate(
+                maps_count=Sum('map_count'),
+                authors_count=Count('author', distinct=True)
+            )
+            .order_by('tag')
+        )
+        return qs
 
 class LeaderboardView(views.APIView):
     def get(self, request, *args, **kwargs):

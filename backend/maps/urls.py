@@ -10,5 +10,6 @@ urlpatterns = [
     path('authors/', AuthorListView.as_view(), name='author-list'),
     path('author/<str:name>/', AuthorProfileView.as_view(), name='author-profile'),
     path('categories/', CategoriesListView.as_view(), name='categories-list'),
+    path('tags/', TagsListView.as_view(), name='tags-list'),
     path('leaderboards/', LeaderboardView.as_view(), name='leaderboards'),
 ]

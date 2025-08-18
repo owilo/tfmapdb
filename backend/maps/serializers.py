@@ -81,6 +81,11 @@ class CategoriesListSerializer(serializers.Serializer):
     maps_count = serializers.IntegerField()
     authors_count = serializers.IntegerField()
 
+class TagsListSerializer(serializers.Serializer):
+    tag = serializers.CharField()
+    maps_count = serializers.IntegerField()
+    authors_count = serializers.IntegerField()
+
 class AuthorCountSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     name = serializers.CharField()
