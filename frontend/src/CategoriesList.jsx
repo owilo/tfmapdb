@@ -6,24 +6,24 @@ import CategoryIcon from './CategoryIcon'
 import categories from './assets/categories.json'
 import { Trans, useTranslation } from 'react-i18next';
 
-function groupBySupercategories(categoriesData = [], supercategories = {}, otherKey = 'supercategories.other') {
+function groupBySupercategoriesGeneric(items = [], supercategories = {}, otherKey = 'supercategories.other', getId = (it) => (it.category ?? it.tag ?? it.id ?? it.name ?? '').toString()) {
   const idToSuper = {}
   for (const [scKey, ids] of Object.entries(supercategories)) {
     for (const id of ids) {
-      idToSuper[Number(id)] = scKey
+      idToSuper[String(id)] = scKey
     }
   }
 
   const order = Object.keys(supercategories).concat([otherKey])
-
   const buckets = {}
   order.forEach(k => { buckets[k] = [] })
 
-  for (const cat of categoriesData) {
-    const id = Number(cat.category)
-    const sc = idToSuper[id] || otherKey
+  for (const item of items) {
+    const rawId = getId(item)
+    const idStr = rawId === undefined || rawId === null ? '' : String(rawId)
+    const sc = idToSuper[idStr] || otherKey
     if (!buckets[sc]) buckets[sc] = []
-    buckets[sc].push(cat)
+    buckets[sc].push(item)
   }
 
   return { order, buckets }
@@ -32,12 +32,11 @@ function groupBySupercategories(categoriesData = [], supercategories = {}, other
 function ItemCard({ item, isTag = false }) {
   const { t } = useTranslation()
   const idKey = item.category ?? item.tag ?? item.id ?? item.name ?? ''
-
-  const labelKey = categories[idKey]?.name ?? categories.default.name
+  const labelKey = categories[idKey]?.name
 
   const mainLink = isTag ? `/tag/${encodeURIComponent(idKey)}` : `/category/${encodeURIComponent(idKey)}`
-  const galleryQuery = `/gallery?s=%23${encodeURIComponent(idKey)}`
-  const authorsQuery = `/authors?s=%23${encodeURIComponent(idKey)}`
+  const galleryQuery = isTag ? `/gallery?s=%24${encodeURIComponent(idKey)}` : `/gallery?s=%23${encodeURIComponent(idKey)}`
+  const authorsQuery = isTag ? `/authors?s=%24${encodeURIComponent(idKey)}` : `/authors?s=%23${encodeURIComponent(idKey)}`
 
   return (
     <div 
@@ -51,7 +50,7 @@ function ItemCard({ item, isTag = false }) {
         >
           <CategoryIcon category={idKey} />
           <span className='relative font-semibold -top-px truncate'>
-            &nbsp;{isTag ? idKey : `P${idKey}`} &ndash; {t(labelKey)}
+            &nbsp;{isTag ? idKey : `P${idKey}`}{labelKey && <> &ndash; {t(labelKey)}</>}
           </span>
         </Link>
       </div>
@@ -107,8 +106,11 @@ export default function CategoriesList() {
     'supercategories.deleted' : [43, 44],
   }
 
-  const tags = 'supercategories.module_tags'
-  const moduleTags = ["hc", "div"]
+  const otherTagKey = 'supercategories.other_tags'
+  const tagSupercategories = {
+    'supercategories.module_tags': ["hc", "div"],
+    'supercategories.contest_tags': ["ctst2024", "ctst2025"],
+  }
 
   useEffect(() => {
     const params = window.location.search;
@@ -138,14 +140,15 @@ export default function CategoriesList() {
       })
   }, [])
 
-  const grouped = useMemo(() => groupBySupercategories(categoriesData, supercategories, other), [categoriesData])
+  const groupedCategories = useMemo(
+    () => groupBySupercategoriesGeneric(categoriesData, supercategories, other, (it) => Number(it.category)),
+    [categoriesData]
+  )
 
-  const moduleTagItems = useMemo(() => {
-    if (!Array.isArray(tagsData)) return []
-    const normalizeKey = (t) => (t.tag ?? t.category ?? t.id ?? t.name ?? '').toString()
-    const tagMap = new Map(tagsData.map(t => [normalizeKey(t), t]))
-    return moduleTags.map(k => tagMap.get(k)).filter(Boolean)
-  }, [tagsData])
+  const groupedTags = useMemo(
+    () => groupBySupercategoriesGeneric(tagsData, tagSupercategories, otherTagKey, (it) => (it.tag ?? it.category ?? it.id ?? it.name ?? '').toString()),
+    [tagsData]
+  )
 
   if (loading) return <p>Loading...</p>
   if (error) return <p>{error}</p>
@@ -159,15 +162,15 @@ export default function CategoriesList() {
       </div>
 
       <div className="space-y-3 mt-3">
-        {grouped.order.map(scKey => {
-          const items = grouped.buckets[scKey] || []
+        {groupedCategories.order.map(scKey => {
+          const items = groupedCategories.buckets[scKey] || []
           if (!items.length) return null
 
           return (
             <section key={scKey}>
               <p className='font-light text-gray-600'>{t(scKey)}</p>
 
-              <hr className="border-1 border-t border-gray-300 mb-2" />
+              <hr className="border-1 border-t border-gray-500 mb-2" />
 
               <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
                 {items.map(categoryData => (
@@ -178,19 +181,24 @@ export default function CategoriesList() {
           )
         })}
 
-        {moduleTagItems.length > 0 && (
-          <section key={tags} className="mt-2">
-            <p className='font-light text-gray-600'>{t(tags)}</p>
+        {groupedTags.order.map(scKey => {
+          const items = groupedTags.buckets[scKey] || []
+          if (!items.length) return null
 
-            <hr className="border-1 border-t border-gray-300 mb-2" />
+          return (
+            <section key={scKey} className="mt-2">
+              <p className='font-light text-gray-600'>{t(scKey)}</p>
 
-            <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
-              {moduleTagItems.map(tagItem => (
-                <ItemCard key={(tagItem.tag ?? tagItem.category ?? tagItem.id ?? tagItem.name)} item={tagItem} isTag />
-              ))}
-            </div>
-          </section>
-        )}
+              <hr className="border-1 border-t border-gray-500 mb-2" />
+
+              <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3'>
+                {items.map(tagItem => (
+                  <ItemCard key={(tagItem.tag ?? tagItem.category ?? tagItem.id ?? tagItem.name)} item={tagItem} isTag />
+                ))}
+              </div>
+            </section>
+          )
+        })}
       </div>
     </>
   )

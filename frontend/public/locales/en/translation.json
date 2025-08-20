@@ -82,7 +82,9 @@
     "module": "Module",
     "test": "Test",
     "other": "Other",
-    "module_tags": "All modules"
+    "module_tags": "All modules",
+    "contest_tags": "Contests",
+    "other_tags": "Other tags"
   },
   "modules": {
     "hardcamp": "Hardcamp",

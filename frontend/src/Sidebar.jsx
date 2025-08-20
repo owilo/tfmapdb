@@ -32,13 +32,13 @@ export default function Sidebar() {
           <span className="hidden sm:inline">{t("navigation.categories")}</span>
         </Link>
 
-        <Link
+        {/*<Link
           to="/modules"
           className="flex items-center justify-center sm:justify-start space-x-0 sm:space-x-2 px-3 py-2 rounded hover:bg-gray-700"
         >
           <Puzzle size="1em" />
           <span className="hidden sm:inline">{t("navigation.modules")}</span>
-        </Link>
+        </Link>*/}
 
         <Link
           to="/leaderboards"
