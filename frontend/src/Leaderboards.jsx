@@ -121,7 +121,7 @@ export default function Gallery() {
             <div className="flex items-center">
               <List className='inline-block' size='1em' />
               &nbsp;
-              <span className='relative font-semibold -top-px truncate'>
+              <span className='relative font-semibold -top-px truncate text-gray-800'>
                 {t("leaderboards.high_perms")}
               </span>
             </div>
@@ -134,7 +134,7 @@ export default function Gallery() {
             <div className="flex items-center">
               <List className='inline-block' size='1em' />
               &nbsp;
-              <span className='relative font-semibold -top-px truncate'>
+              <span className='relative font-semibold -top-px truncate text-gray-800'>
                 {t("leaderboards.category")}
               </span>
             </div>
@@ -147,7 +147,7 @@ export default function Gallery() {
             <div className="flex items-center">
               <List className='inline-block' size='1em' />
               &nbsp;
-              <span className='relative font-semibold -top-px truncate'>
+              <span className='relative font-semibold -top-px truncate text-gray-800'>
                 {t("leaderboards.exported")}
               </span>
             </div>

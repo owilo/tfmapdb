@@ -36,7 +36,7 @@ export default function AuthorProfile() {
         <Link to="/authors">← Back</Link>
         <h1>Author {name}</h1>
         <pre>
-            {JSON.stringify(entry)}
+            {console.log(entry)}
         </pre>
       </div>
     </>

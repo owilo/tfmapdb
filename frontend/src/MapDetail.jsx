@@ -14,6 +14,39 @@ import CategoryIcon from './CategoryIcon';
 import categories from './assets/categories.json';
 import { useTranslation } from 'react-i18next';
 
+function CollapsibleSection({
+  icon: Icon,
+  title,
+  children,
+  defaultOpen = true,
+  triggerClassName,
+  contentClassName,
+}) {
+  const baseTrigger =
+    'flex items-center space-x-2 px-2 py-1 w-full text-start ' +
+    'bg-gray-300 text-gray-800 rounded-t-sm rounded-b-sm ' +
+    'data-[state=open]:rounded-b-none hover:brightness-105 transition duration-200';
+
+  const baseContent =
+    'bg-gray-100 text-gray-800 overflow-hidden transition-all ' +
+    'data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down ' +
+    'rounded-b-sm';
+
+  return (
+    <Collapsible defaultOpen={defaultOpen}>
+      <CollapsibleTrigger className={clsx(baseTrigger, triggerClassName)}>
+        {Icon && <Icon size="1.25em" />}
+        <span className="relative -top-px">{title}</span>
+      </CollapsibleTrigger>
+
+      <CollapsibleContent className={clsx(baseContent, contentClassName)}>
+        {children}
+      </CollapsibleContent>
+    </Collapsible>
+  );
+}
+
+
 export default function MapDetail() {
   const { t } = useTranslation();
   const { code } = useParams()
@@ -41,24 +74,6 @@ export default function MapDetail() {
   if (loading) return <p>Loading…</p>
   if (error)   return <p style={{ color: 'red' }}>{error}</p>
 
-  const headerStyle = `
-    flex items-center space-x-2
-    px-2 py-1 w-full text-start 
-    bg-gray-300 text-gray-800 
-    rounded-t-sm 
-    rounded-b-sm 
-    data-[state=open]:rounded-b-none
-    hover:brightness-105 transition duration-200
-  `
-  const contentStyle = `
-    p-1
-    bg-gray-100 text-gray-800
-    overflow-hidden transition-all 
-    data-[state=closed]:animate-collapsible-up 
-    data-[state=open]:animate-collapsible-down
-    rounded-b-sm
-  `
-
   return (
     <>
       <title>{`@${map.code}`}</title>
@@ -75,101 +90,74 @@ export default function MapDetail() {
           </Link>
 
           <h1 className="text-center font-semibold text-gray-800 text-xl">
-            @{map?.code}
+            @{map.code}
           </h1>
         </div>
 
         <div className="flex flex-1 overflow-hidden">
           <div className="w-3/5 flex overflow-auto flex-col border-r border-neutral-300 p-2 space-y-2">
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className={clsx(headerStyle)}>
-                <Image size='1.25em' />
-                <span className='relative -top-px'>{t("map.image")}</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className={clsx(contentStyle)}>
-                <div className="p-2">
-                  <img
-                    src={`/api/map/${map.code}/image.png`}
-                    alt="Map"
-                    loading="lazy"
-                    className="w-full object-contain bg-[#626b8a] max-h-[300px]"
-                  />
-                  {/*style={{ maxHeight: `${map.map_data.height}px` }}*/}
-                </div>
-              </CollapsibleContent>
-            </Collapsible>
+            <CollapsibleSection icon={Image} title={t("map.image")} defaultOpen>
+              <img
+                src={`/api/map/${map.code}/image.png`}
+                alt="Map"
+                loading="lazy"
+                className="w-full object-contain bg-[#626b8a] max-h-[300px]"
+              />
+            </CollapsibleSection>
 
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className={clsx(headerStyle)}>
-                <BookOpen size='1.25em' />
-                <span className='relative -top-px'>{t("map.details")}</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className={clsx(contentStyle)}>
-                <ul>
-                  <li><span className='font-semibold'>{t("map.code")}</span>&nbsp;@{map.code}</li>
-                  <li>
-                    <span className='font-semibold'>{t("map.author")}</span>&nbsp;
+            <CollapsibleSection icon={BookOpen} title={t("map.details")} defaultOpen contentClassName="px-2 py-1">
+              <ul>
+                <li><span className='font-semibold'>{t("map.code")}</span>&nbsp;@{map.code}</li>
+                <li>
+                  <span className='font-semibold'>{t("map.author")}</span>&nbsp;
+                  <Link
+                    to={`/author/${encodeURIComponent(map.author.name)}`}
+                    className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'
+                  >
+                    {map.author.name}
+                  </Link>
+                </li>
+                <li className='flex items-center'>
+                  <span className='font-semibold'>{t("map.category")}</span>&nbsp;
+                  <Link
+                    to={`/category/${map.category}`}
+                    className="font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
+                    title={t(categories[map.category]?.name || categories.default.name)}
+                  >
+                    <CategoryIcon category={map.category} />
+                    <span>P{map.category}</span>
+                  </Link>
+                </li>
+                {map.tags.length > 0 && <li className='flex items-center'>
+                  <span className='font-semibold'>{t("map.tags")}</span>&nbsp;
+                  {map.tags.map(tag => (
                     <Link
-                      to={`/author/${encodeURIComponent(map.author_name)}`}
-                      className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'
+                      to={`/gallery/?s=%24${tag}`}
+                      className="mr-1 font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
+                      title={tag}
                     >
-                      {map.author.name}
+                      <CategoryIcon category={tag} />
+                      <span>{t(categories[tag]?.name) || tag}</span>
                     </Link>
-                  </li>
-                  <li className='flex items-center'>
-                    <span className='font-semibold'>{t("map.category")}</span>&nbsp;
-                    <Link
-                      to={`/category/${map.category}`}
-                      className="font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
-                      title={t(categories[map.category]?.name || categories.default.name)}
-                    >
-                      <CategoryIcon category={map.category} />
-                      <span>P{map.category}</span>
-                    </Link>
-                  </li>
-                  {map.tags.length > 0 && <li className='flex items-center'>
-                    <span className='font-semibold'>{t("map.tags")}</span>&nbsp;
-                    {map.tags.map(tag => (
-                      <Link
-                        to={`/gallery/?s=%24${tag}`}
-                        className="mr-1 font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
-                        title={tag}
-                      >
-                        <CategoryIcon category={tag} />
-                        <span>{t(categories[tag]?.name) || tag}</span>
-                      </Link>
-                    ))}
-                  </li>}
-                </ul>
-              </CollapsibleContent>
-            </Collapsible>
+                  ))}
+                </li>}
+              </ul>
+            </CollapsibleSection>
 
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className={clsx(headerStyle)}>
-                <Settings size='1.25em' />
-                <span className='relative -top-px'>{t("map.properties")}</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className={clsx(contentStyle)}>
-                <ul>
-                  <li><span className='font-semibold'>{t("map.dimensions")}</span>&nbsp;{map.map_data.length}&times;{map.map_data.height}</li>
-                </ul>
-              </CollapsibleContent>
-            </Collapsible>
+            <CollapsibleSection icon={Settings} title={t("map.properties")} defaultOpen contentClassName="px-2 py-1">
+              <ul>
+                <li><span className='font-semibold'>{t("map.dimensions")}</span>&nbsp;{map.map_data.length}×{map.map_data.height}</li>
+              </ul>
+            </CollapsibleSection>
 
-            <Collapsible defaultOpen>
-              <CollapsibleTrigger className={clsx(headerStyle)}>
-                <ListCollapse size='1.25em' />
-                <span className='relative -top-px'>{t("map.content")}</span>
-              </CollapsibleTrigger>
-              <CollapsibleContent className={clsx(contentStyle)}>
-                <ul>
-                  <li><span className='font-semibold'>{t("map.grounds_count")}</span>&nbsp;{map.map_data.grounds_count}/60</li>
-                  <li><span className='font-semibold'>{t("map.decorations_count")}</span>&nbsp;{map.map_data.decorations_count}/50</li>
-                  <li><span className='font-semibold'>{t("map.objects_count")}</span>&nbsp;{map.map_data.objects_count}/40</li>
-                  <li><span className='font-semibold'>{t("map.joints_count")}</span>&nbsp;{map.map_data.joints_count}</li>
-                </ul>
-              </CollapsibleContent>
-            </Collapsible>
+            <CollapsibleSection icon={ListCollapse} title={t("map.content")} defaultOpen contentClassName="px-2 py-1">
+              <ul>
+                <li><span className='font-semibold'>{t("map.grounds_count")}</span>&nbsp;{map.map_data.grounds_count}/60</li>
+                <li><span className='font-semibold'>{t("map.decorations_count")}</span>&nbsp;{map.map_data.decorations_count}/50</li>
+                <li><span className='font-semibold'>{t("map.objects_count")}</span>&nbsp;{map.map_data.objects_count}/40</li>
+                <li><span className='font-semibold'>{t("map.joints_count")}</span>&nbsp;{map.map_data.joints_count}</li>
+              </ul>
+            </CollapsibleSection>
           </div>
 
           <div className="w-2/5 overflow-auto p-2">
