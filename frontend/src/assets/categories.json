@@ -123,9 +123,17 @@
         "name": "categories.deleted",
         "image": "official/44.webp"
     },
+    "60": {
+        "name": "categories.thematic_storage",
+        "image": "official/66.webp"
+    },
     "66": {
         "name": "categories.thematic",
         "image": "official/66.webp"
+    },
+    "87": {
+        "name": "categories.vanilla_storage",
+        "image": "official/vanilla.webp"
     },
     "hc": {
         "name": "modules.hardcamp",

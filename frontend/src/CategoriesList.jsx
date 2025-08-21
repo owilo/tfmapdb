@@ -46,7 +46,7 @@ function ItemCard({ item, isTag = false }) {
       <div>
         <Link
           to={mainLink}
-          className="flex items-center transition duration-200 cursor-pointer font-semibold text-sky-800 hover:text-sky-600"
+          className="flex items-center transition duration-200 cursor-pointer font-semibold text-sky-700 hover:text-sky-500"
         >
           <CategoryIcon category={idKey} />
           <span className='relative font-semibold -top-px truncate'>
@@ -98,11 +98,11 @@ export default function CategoriesList() {
     'supercategories.normal' : [0, 1, 4, 5, 6, 7, 8, 9, 12, 66],
     'supercategories.bootcamp' : [3, 13],
     'supercategories.survivor' : [10, 11, 24],
-    'supercategories.racing' : [17, 38],
+    'supercategories.racing' : [17],
     'supercategories.defilante' : [18],
     'supercategories.module' : [41],
     'supercategories.tribehouse' : [22],
-    'supercategories.test' : [20, 21, 23, 32, 34, 42],
+    'supercategories.test' : [20, 21, 23, 32, 34, 42, 38, 60, 87],
     'supercategories.deleted' : [43, 44],
   }
 

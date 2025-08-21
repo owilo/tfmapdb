@@ -45,9 +45,12 @@ export default function AuthorList() {
             key={author.name}
             className='bg-gray-200 rounded-sm shadow-lg px-2 py-1 truncate'
           >
-            <div className='font-semibold text-sky-700 hover:text-sky-500 transition duration-200'>
-              <Link to={`/author/${encodeURIComponent(author.name)}`}>{author.name}</Link>
-            </div>
+            <Link
+              className='flex items-center font-semibold text-sky-700 hover:text-sky-500 transition duration-200'
+              to={`/author/${encodeURIComponent(author.name)}`}
+            >
+              {author.name}
+            </Link>
 
             <hr class="border-1 border-t border-gray-400" />
 

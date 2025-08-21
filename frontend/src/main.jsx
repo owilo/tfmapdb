@@ -7,6 +7,7 @@ import MapDetail from './MapDetail';
 import AuthorList from './AuthorList';
 import AuthorProfile from './AuthorProfile';
 import CategoriesList from './CategoriesList';
+import Leaderboards from './Leaderboards';
 import "./i18n";
 
 ReactDOM.createRoot(document.getElementById('root')).render(
@@ -20,6 +21,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="authors" element={<AuthorList />} />
           <Route path="author/:name" element={<AuthorProfile />} />
           <Route path="categories" element={<CategoriesList />} />
+          <Route path="leaderboards" element={<Leaderboards />} />
         </Route>
       </Routes>
     </BrowserRouter>

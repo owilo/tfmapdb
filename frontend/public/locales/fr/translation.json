@@ -26,6 +26,12 @@
     "title": "Catégories de cartes",
     "search_placeholder": "Rechercher des catégories, modules ou tags"
   },
+  "leaderboards": {
+    "title": "Classements",
+    "high_perms": "Nombre de cartes hautes",
+    "exported": "Nombre de cartes exportées",
+    "category": "Nombre de catégories hautes"
+  },
   "map": {
     "image": "Image de la carte",
     "details": "Détails de la carte",
@@ -74,7 +80,9 @@
     "no_shaman_test": "Test Sans Chamane",
     "inappropriate": "Inapproprié",
     "deleted": "Supprimé",
-    "thematic": "Thématique"
+    "thematic": "Thématique",
+    "thematic_storage": "Stockage Thématique",
+    "vanilla_storage": "Stockage Vanilla"
   },
   "supercategories": {
     "normal": "Normal",
@@ -85,7 +93,7 @@
     "racing": "Racing",
     "defilante": "Défilante",
     "module": "Module",
-    "test": "Test",
+    "test": "Test et stockage",
     "other": "Autre",
     "module_tags": "Tous les modules",
     "contest_tags": "Concours",

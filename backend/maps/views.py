@@ -3,12 +3,15 @@ from io import BytesIO
 from PIL import Image, ImageDraw, ImageFont
 from collections import defaultdict
 
-from django.db.models import Q, Count, Sum
+from django.db.models import Q, Count, Sum, IntegerField, Value
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.postgres.aggregates import ArrayAgg
 
-from rest_framework import views, generics, response, status
+from rest_framework import views, generics, response
+from django.db.models import Sum, Count
+from rest_framework import generics
 
 from .models import Map, Author, AuthorCategoryCounter, AuthorTagCounter
 from .serializers import *
@@ -233,23 +236,30 @@ class AuthorListView(generics.ListAPIView):
         raw = self.request.GET.get('s', '').strip()
 
         qs = Author.objects.annotate(
-            total_maps=Count('maps'),
+            total_maps=Coalesce(
+                Sum('category_counters__map_count'),
+                Value(0, output_field=IntegerField())
+            ),
+
+            total_high_perms=Coalesce(
+                Sum(
+                    'category_counters__map_count',
+                    filter=Q(category_counters__category__in=CATEGORIES_HIGH)
+                ),
+                Value(0, output_field=IntegerField())
+            ),
+
             category_tags=ArrayAgg(
-                'maps__category',
-                filter=Q(maps__category__in=CATEGORIES_TAG),
+                'category_counters__category',
+                filter=Q(category_counters__category__in=CATEGORIES_TAG),
                 distinct=True
             ),
-            total_high_perms=Count(
-                'maps',
-                filter=Q(maps__category__in=CATEGORIES_HIGH)
-            )
         )
 
         if raw:
             qs = qs.filter(name__icontains=raw)
 
-        return qs.order_by('id')
-
+        return qs.order_by('name')
 
 class AuthorProfileView(generics.RetrieveAPIView):
     serializer_class = AuthorDetailSerializer
@@ -299,12 +309,6 @@ class AuthorProfileView(generics.RetrieveAPIView):
 
         serializer = self.get_serializer(author, context={'category_list': category_list})
         return response.Response(serializer.data)
-
-from django.db.models import Sum, Count
-from rest_framework import generics
-
-from .models import AuthorCategoryCounter, AuthorTagCounter
-from .serializers import CategoriesListSerializer, TagsListSerializer
 
 class CategoriesListView(generics.ListAPIView):
     serializer_class = CategoriesListSerializer

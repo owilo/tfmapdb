@@ -21,6 +21,12 @@
     "title": "Map categories",
     "search_placeholder": "Search categories, modules or tags"
   },
+  "leaderboards": {
+    "title": "Leaderboards",
+    "high_perms": "Total high perms",
+    "exported": "Total exported maps",
+    "category": "Total high categories"
+  },
   "map": {
     "image": "Map image",
     "details": "Map details",
@@ -69,7 +75,8 @@
     "no_shaman_test": "No Shaman Test",
     "inappropriate": "Inappropriate",
     "deleted": "Deleted",
-    "thematic": "Thematic"
+    "thematic_storage": "Thematic Storage",
+    "vanilla_storage": "Vanilla Storage"
   },
   "supercategories": {
     "normal": "Normal",
@@ -80,7 +87,7 @@
     "racing": "Racing",
     "defilante": "Defilante",
     "module": "Module",
-    "test": "Test",
+    "test": "Test and storage",
     "other": "Other",
     "module_tags": "All modules",
     "contest_tags": "Contests",
