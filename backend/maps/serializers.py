@@ -59,22 +59,18 @@ class MinimalAuthorSerializer(serializers.ModelSerializer):
     def get_category_tags(self, obj):
         return getattr(obj, 'category_tags') or []
 
-class AuthorDetailSerializer(serializers.ModelSerializer):
-    categories = serializers.ListField(read_only=True)
+class CategoryCountSerializer(serializers.Serializer):
+    category = serializers.IntegerField()
+    permanent = serializers.BooleanField()
+    map_count = serializers.IntegerField()
 
-    class Meta:
-        model = Author
-        fields = ('id', 'name', 'categories')
-
-    def to_representation(self, instance):
-        category_list = self.context.get('category_list')
-        if category_list is None:
-            counts = Map.objects.filter(author=instance).values('category').annotate(count=Count('code'))
-            category_list = [{'category': c['category'], 'count': c['count']} for c in counts]
-
-        data = super().to_representation(instance)
-        data['categories'] = category_list
-        return data
+class AuthorDetailSerializer(serializers.Serializer):
+    total_maps = serializers.IntegerField()
+    high_maps = serializers.IntegerField()
+    permed_maps = serializers.IntegerField()
+    categories = CategoryCountSerializer(many=True)
+    last_exported = serializers.ListField(child=serializers.IntegerField())
+    last_permed = serializers.ListField(child=serializers.IntegerField())
 
 class CategoriesListSerializer(serializers.Serializer):
     category = serializers.IntegerField()

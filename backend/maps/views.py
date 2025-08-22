@@ -262,52 +262,55 @@ class AuthorListView(generics.ListAPIView):
         return qs.order_by('name')
 
 class AuthorProfileView(generics.RetrieveAPIView):
-    serializer_class = AuthorDetailSerializer
+    queryset = Author.objects.all()
     lookup_field = 'name'
-    pagination_class = None
+    serializer_class = AuthorDetailSerializer
 
-    def get(self, request, name, *args, **kwargs):
-        author = get_object_or_404(Author, name=name)
+    def retrieve(self, request, *args, **kwargs):
+        author = self.get_object()
 
-        counts_qs = (
-            Map.objects
-               .filter(author=author)
-               .values('category')
-               .annotate(count=Count('code'))
-        )
-        category_list = [
-            {'category': item['category'], 'count': item['count']}
-            for item in counts_qs
+        permed_set = set(CATEGORIES_PERMED)
+
+        high_set = set(CATEGORIES_HIGH)
+
+        acc_qs = AuthorCategoryCounter.objects.filter(author=author)
+
+        total_maps = acc_qs.aggregate(total=Sum('map_count'))['total'] or 0
+
+        high_maps = acc_qs.filter(category__in=high_set).aggregate(total=Sum('map_count'))['total'] or 0
+
+        permed_maps = acc_qs.filter(category__in=permed_set).aggregate(total=Sum('map_count'))['total'] or 0
+
+        categories_qs = acc_qs.filter(map_count__gt=0).values('category', 'map_count').order_by('category')
+
+        categories = [
+            {
+                'category': int(row['category']),
+                'map_count': int(row['map_count']),
+                'permanent': (row['category'] in permed_set)
+            }
+            for row in categories_qs
         ]
 
-        category_index = {item['category']: item for item in category_list}
-
-        special_ids = set(CATEGORIES_HIGH) | set(CATEGORIES_BOOTCAMP) | {41}
-
-        codes_qs = (
-            Map.objects
-               .filter(author=author, category__in=special_ids)
-               .order_by('-code')
-               .values('category', 'code')
+        last_exported = list(
+            Map.objects.filter(author=author).order_by('-code').values_list('code', flat=True)[:10]
         )
 
-        codes_by_cat = defaultdict(list)
-        for row in codes_qs:
-            cid = row['category']
-            if len(codes_by_cat[cid]) < 20:
-                codes_by_cat[cid].append(row['code'])
+        last_permed = list(
+            Map.objects.filter(author=author, category__in=permed_set).order_by('-code').values_list('code', flat=True)[:10]
+        )
 
-        for cid, codes in codes_by_cat.items():
-            if cid in category_index:
-                category_index[cid]['codes'] = codes
-            else:
-                new_item = {'category': cid, 'count': len(codes), 'codes': codes}
-                category_list.append(new_item)
-                category_index[cid] = new_item
+        payload = {
+            "total_maps": int(total_maps),
+            "high_maps": int(high_maps),
+            "permed_maps": int(permed_maps),
+            "categories": categories,
+            "last_exported": last_exported,
+            "last_permed": last_permed,
+        }
 
-        category_list.sort(key=lambda x: x['category'])
-
-        serializer = self.get_serializer(author, context={'category_list': category_list})
+        serializer = self.get_serializer(data=payload)
+        serializer.is_valid(raise_exception=True)
         return response.Response(serializer.data)
 
 class CategoriesListView(generics.ListAPIView):

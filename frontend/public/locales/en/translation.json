@@ -17,6 +17,17 @@
     "title": "Map authors",
     "search_placeholder": "Search authors"
   },
+  "author_profile": {
+    "maps_statistics": "Map statistics",
+    "last_permed": "Latest permed maps",
+    "last_exported": "Latest exported maps",
+    "see_more": "See more in gallery",
+    "map_count": "Exported map count:",
+    "perm_count": "Perm count:",
+    "high_perm_count": "High perm count:",
+    "categories": "Categories:",
+    "view_on_atelier801": "View on Atelier801"
+  },
   "categories_list": {
     "title": "Map categories",
     "search_placeholder": "Search categories, modules or tags"

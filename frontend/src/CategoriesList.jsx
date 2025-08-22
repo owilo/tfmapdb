@@ -168,7 +168,7 @@ export default function CategoriesList() {
 
           return (
             <section key={scKey}>
-              <p className='font-light text-gray-600'>{t(scKey)}</p>
+              <h2 className='font-light text-gray-600'>{t(scKey)}</h2>
 
               <hr className="border-1 border-t border-gray-500 mb-2" />
 
@@ -187,7 +187,7 @@ export default function CategoriesList() {
 
           return (
             <section key={scKey} className="mt-2">
-              <p className='font-light text-gray-600'>{t(scKey)}</p>
+              <h2 className='font-light text-gray-600'>{t(scKey)}</h2>
 
               <hr className="border-1 border-t border-gray-500 mb-2" />
 

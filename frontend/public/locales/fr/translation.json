@@ -22,6 +22,17 @@
     "title": "Auteurs de cartes",
     "search_placeholder": "Rechercher des auteurs"
   },
+  "author_profile": {
+    "maps_statistics": "Statistiques des cartes",
+    "last_permed": "Dernières cartes permanentes",
+    "last_exported": "Dernières cartes exportées",
+    "see_more": "Voir plus dans la galerie",
+    "map_count": "Nombre de cartes exportées :",
+    "perm_count": "Nombre de cartes permanentes :",
+    "high_perm_count": "Nombre de cartes hautes :",
+    "categories": "Catégories :",
+    "view_on_atelier801": "Voir sur Atelier801"
+  },
   "categories_list": {
     "title": "Catégories de cartes",
     "search_placeholder": "Rechercher des catégories, modules ou tags"

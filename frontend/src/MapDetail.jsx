@@ -46,7 +46,6 @@ function CollapsibleSection({
   );
 }
 
-
 export default function MapDetail() {
   const { t } = useTranslation();
   const { code } = useParams()
