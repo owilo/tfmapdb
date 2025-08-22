@@ -293,12 +293,16 @@ class AuthorProfileView(generics.RetrieveAPIView):
         ]
 
         last_exported = list(
-            Map.objects.filter(author=author).order_by('-code').values_list('code', flat=True)[:10]
+            Map.objects.filter(author=author)
+            .order_by('-code')
+            .values('code', 'category')[:10]
         )
 
         last_permed = list(
-            Map.objects.filter(author=author, category__in=permed_set).order_by('-code').values_list('code', flat=True)[:10]
-        )
+            Map.objects.filter(author=author, category__in=permed_set)
+            .order_by('-code')
+            .values('code', 'category')[:10]
+        )   
 
         payload = {
             "total_maps": int(total_maps),

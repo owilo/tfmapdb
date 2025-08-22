@@ -6,6 +6,7 @@ import './style/main.css'
 import './style/animations.css'
 import CategoryIcon from './CategoryIcon';
 import categories from './assets/categories.json';
+import MapThumbnail from './MapThumbnail';
 
 export default function AuthorProfile() {
   const { t } = useTranslation();
@@ -137,6 +138,56 @@ export default function AuthorProfile() {
                   ]}
                 />
               </span>
+            </div>
+          ))}
+        </div>
+
+        <div>
+          <h2 className='font-light text-gray-600 text-lg mt-4'>
+            {t("author_profile.last_permed")}
+            &nbsp;
+            <Link
+              to={`/gallery?s=${encodeURIComponent(name)}`}
+              className="font-semibold text-sm text-sky-900 hover:text-sky-700 transition duration-200"
+            >
+              ({t("author_profile.see_more")})
+            </Link>
+          </h2>
+          <hr className="border-1 border-t border-gray-500 mb-2" />
+        </div>
+
+        <div className="overflow-x-scroll flex flex-nowrap space-x-2">
+            {author.last_permed.map(last_perm => (
+              <div key={last_perm.code} className="w-1/6 flex-shrink-0">
+                <MapThumbnail
+                  code={last_perm.code}
+                  category={last_perm.category}
+                />
+              </div>
+            ))}
+        </div>
+
+        <div>
+          <h2 className='font-light text-gray-600 text-lg mt-4'>
+            {t("author_profile.last_exported")}
+            &nbsp;
+            <Link
+              to={`/gallery?s=${encodeURIComponent(`${name} #p`)}`}
+              className="font-semibold text-sm text-sky-900 hover:text-sky-700 transition duration-200"
+            >
+              ({t("author_profile.see_more")})
+            </Link>
+          </h2>
+          <hr className="border-1 border-t border-gray-500 mb-2" />
+        </div>
+
+        <div className="overflow-x-scroll flex flex-nowrap space-x-2">
+          {author.last_exported.map(last_exported => (
+            <div key={last_exported.code} className='w-1/6 flex-shrink-0'>
+              <MapThumbnail
+                code={last_exported.code}
+                category={last_exported.category}
+              />
             </div>
           ))}
         </div>

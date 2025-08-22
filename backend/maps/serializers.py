@@ -64,13 +64,17 @@ class CategoryCountSerializer(serializers.Serializer):
     permanent = serializers.BooleanField()
     map_count = serializers.IntegerField()
 
+class MapSummarySerializer(serializers.Serializer):
+    code = serializers.IntegerField()
+    category = serializers.IntegerField()
+
 class AuthorDetailSerializer(serializers.Serializer):
     total_maps = serializers.IntegerField()
     high_maps = serializers.IntegerField()
     permed_maps = serializers.IntegerField()
     categories = CategoryCountSerializer(many=True)
-    last_exported = serializers.ListField(child=serializers.IntegerField())
-    last_permed = serializers.ListField(child=serializers.IntegerField())
+    last_exported = MapSummarySerializer(many=True)
+    last_permed = MapSummarySerializer(many=True)
 
 class CategoriesListSerializer(serializers.Serializer):
     category = serializers.IntegerField()
