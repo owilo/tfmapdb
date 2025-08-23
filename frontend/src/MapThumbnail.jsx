@@ -29,8 +29,16 @@ export default function MapThumbnail({ code, category, author = undefined }) {
     </div>
 
     <Link to={`/map/${code}`}>
-      <img src={`/api/map/${code}/image.png`} alt="Map" className='w-full rounded-sm hover:brightness-110 transition duration-200' loading="lazy" />
+      <div className="w-full rounded-sm overflow-hidden bg-[#626b8a] aspect-[2/1]">
+        <img
+          src={`/api/map/${code}/image.png?scale=0.5`}
+          alt="Map"
+          loading="lazy"
+          className="w-full h-full object-contain object-center hover:brightness-110 transition duration-200"
+        />
+      </div>
     </Link>
+
 
     {author &&
       <div className="text-sm text-gray-600">

@@ -11,6 +11,10 @@ export default defineConfig({
     tsconfigPaths()
   ],
   server: {
+    host: true,
+    allowedHosts: [
+      ".ngrok-free.app"
+    ],
     proxy: {
       '/api': {
         target: 'http://127.0.0.1:8000',

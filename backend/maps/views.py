@@ -16,6 +16,7 @@ from rest_framework import generics
 from .models import Map, Author, AuthorCategoryCounter, AuthorTagCounter
 from .serializers import *
 from .constants import *
+from .utils import xml_to_image
 
 map_code_regex = re.compile(r"^!?((@?\d+(-@?\d*)?)|(-@?\d+))$")
 author_regex = re.compile(r'^!?\+?[A-Za-z]\w*(?:#\d{4})?$', re.IGNORECASE)
@@ -187,43 +188,22 @@ class MapDetailView(generics.RetrieveAPIView):
     lookup_field = 'code'
 
 class MapImageView(views.APIView):
-    # TODO Generate actual map images
     def get(self, request, code, format=None):
         map_obj = get_object_or_404(Map, code=code)
 
+        try:
+            scale = float(request.GET.get('scale', 1.0))
+        except ValueError:
+            scale = 1.0
+
+        if not (0 < scale <= 1):
+            scale = 1.0
+
         xml_text = map_obj.xml or ''
 
-        width, height = 800, 400
-        image = Image.new('RGB', (width, height), '#6a7495')
-        draw = ImageDraw.Draw(image)
-
-        font = ImageFont.load_default(size=18)
-
-        margin, offset = 10, 10
-        for line in xml_text.splitlines():
-            words = line.split(' ')
-            current_line = ''
-            for word in words:
-                test_line = f"{current_line}{word} "
-                bbox = draw.textbbox((0, 0), test_line, font=font)
-                line_width = bbox[2] - bbox[0]
-                line_height = bbox[3] - bbox[1]
-
-                if line_width > width - 2 * margin:
-                    draw.text((margin, offset), current_line, font=font, fill='white')
-                    offset += line_height + 2
-                    current_line = f"{word} "
-                else:
-                    current_line = test_line
-
-            if current_line:
-                draw.text((margin, offset), current_line, font=font, fill='white')
-                bbox = draw.textbbox((0, 0), current_line, font=font)
-                offset += (bbox[3] - bbox[1]) + 2
-
+        map_data = extract_map_data(xml_text)
+        image = xml_to_image(xml_text, (map_data["length"], map_data["height"]), scale)
         buffer = BytesIO()
-        # Thumbnail
-        #image = image.resize((350, 175), Image.Resampling.LANCZOS)
         image.save(buffer, format='PNG')
         buffer.seek(0)
         return HttpResponse(buffer, content_type='image/png')
