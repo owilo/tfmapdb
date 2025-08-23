@@ -150,21 +150,21 @@ export default function AuthorProfile() {
               to={`/gallery?s=${encodeURIComponent(name)}`}
               className="font-semibold text-sm text-sky-900 hover:text-sky-700 transition duration-200"
             >
-              ({t("author_profile.see_more")})
+              ({t("navigation.see_more")})
             </Link>
           </h2>
           <hr className="border-1 border-t border-gray-500 mb-2" />
         </div>
 
         <div className="overflow-x-scroll flex flex-nowrap space-x-2">
-            {author.last_permed.map(last_perm => (
-              <div key={last_perm.code} className="w-1/6 flex-shrink-0">
-                <MapThumbnail
-                  code={last_perm.code}
-                  category={last_perm.category}
-                />
-              </div>
-            ))}
+          {author.last_permed.map(last_perm => (
+            <div key={last_perm.code} className="w-1/3 lg:w-1/5 flex-shrink-0">
+              <MapThumbnail
+                code={last_perm.code}
+                category={last_perm.category}
+              />
+            </div>
+          ))}
         </div>
 
         <div>
@@ -175,7 +175,7 @@ export default function AuthorProfile() {
               to={`/gallery?s=${encodeURIComponent(`${name} #p`)}`}
               className="font-semibold text-sm text-sky-900 hover:text-sky-700 transition duration-200"
             >
-              ({t("author_profile.see_more")})
+              ({t("navigation.see_more")})
             </Link>
           </h2>
           <hr className="border-1 border-t border-gray-500 mb-2" />
@@ -183,7 +183,7 @@ export default function AuthorProfile() {
 
         <div className="overflow-x-scroll flex flex-nowrap space-x-2">
           {author.last_exported.map(last_exported => (
-            <div key={last_exported.code} className='w-1/6 flex-shrink-0'>
+            <div key={last_exported.code} className='w-1/3 lg:w-1/5 flex-shrink-0'>
               <MapThumbnail
                 code={last_exported.code}
                 category={last_exported.category}

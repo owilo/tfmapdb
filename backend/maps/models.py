@@ -39,23 +39,23 @@ class Map(models.Model):
     class Meta:
         db_table = 'map'
         indexes = [
-            models.Index(fields=['category'], name='map_category_idx'), # Index by category
-            models.Index(fields=['author'], name='map_author_idx'), # Index by author
+            models.Index(fields=['category'], name='map_category_idx'),
+            models.Index(fields=['author'], name='map_author_idx'),
             GinIndex(
                 name='map_tags_gin',
                 fields=['tags']
-            ), # GIN index for tags
+            ),
             GinIndex(
                 name='map_xml_trgm',
                 fields=['xml'],
                 opclasses=['gin_trgm_ops'],
-            ), # GIN index for XML content
+            ),
             IvfflatIndex(
                 name='map_emb_ivf',
                 fields=['embedding'],
                 lists=100,
                 opclasses=['vector_l2_ops'],
-            ), # IVF index for map image embeddings
+            ),
         ]
 
     def __str__(self):

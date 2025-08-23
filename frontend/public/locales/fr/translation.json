@@ -6,7 +6,8 @@
     "modules": "Modules",
     "leaderboards": "Classements",
     "contest_history": "Concours",
-    "back_to_gallery": "Retour à la galerie"
+    "back_to_gallery": "Retour à la galerie",
+    "see_more": "Voir plus dans la galerie"
   },
   "search": {
     "placeholder_map": "Rechercher des cartes",
@@ -26,7 +27,6 @@
     "maps_statistics": "Statistiques des cartes",
     "last_permed": "Dernières cartes permanentes",
     "last_exported": "Dernières cartes exportées",
-    "see_more": "Voir plus dans la galerie",
     "map_count": "Nombre de cartes exportées :",
     "perm_count": "Nombre de cartes permanentes :",
     "high_perm_count": "Nombre de cartes hautes :",
@@ -36,6 +36,13 @@
   "categories_list": {
     "title": "Catégories de cartes",
     "search_placeholder": "Rechercher des catégories, modules ou tags"
+  },
+  "tag_data": {
+    "category_data": "Données de la catégorie",
+    "tag_data": "Données du tag",
+    "perm_count": "Nombre de cartes :",
+    "author_count": "Nombre d'auteurs :",
+    "last_permed": "Dernières cartes permanentes"
   },
   "leaderboards": {
     "title": "Classements",

@@ -6,7 +6,8 @@
     "modules": "Modules",
     "leaderboards": "Leaderboards",
     "contest_history": "Contest history",
-    "back_to_gallery": "Back to gallery"
+    "back_to_gallery": "Back to gallery",
+    "see_more": "See more in gallery"
   },
   "gallery": {
     "title": "Map gallery",
@@ -21,12 +22,18 @@
     "maps_statistics": "Map statistics",
     "last_permed": "Latest permed maps",
     "last_exported": "Latest exported maps",
-    "see_more": "See more in gallery",
     "map_count": "Exported map count:",
     "perm_count": "Perm count:",
     "high_perm_count": "High perm count:",
     "categories": "Categories:",
     "view_on_atelier801": "View on Atelier801"
+  },
+  "tag_data": {
+    "category_data": "Category data",
+    "tag_data": "Tag data",
+    "perm_count": "Map count:",
+    "author_count": "Author count:",
+    "last_permed": "Latest permed maps"
   },
   "categories_list": {
     "title": "Map categories",

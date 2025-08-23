@@ -76,6 +76,11 @@ class AuthorDetailSerializer(serializers.Serializer):
     last_exported = MapSummarySerializer(many=True)
     last_permed = MapSummarySerializer(many=True)
 
+class MapAuthorSummarySerializer(serializers.Serializer):
+    code = serializers.IntegerField()
+    author = serializers.CharField()
+    category = serializers.IntegerField()
+
 class CategoriesListSerializer(serializers.Serializer):
     category = serializers.IntegerField()
     maps_count = serializers.IntegerField()

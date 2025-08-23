@@ -131,7 +131,7 @@ export default function MapDetail() {
                   <span className='font-semibold'>{t("map.tags")}</span>&nbsp;
                   {map.tags.map(tag => (
                     <Link
-                      to={`/gallery/?s=%24${tag}`}
+                      to={`/tag/${tag}`}
                       className="mr-1 font-semibold text-gray-700 text-sm flex items-center gap-1 bg-gray-400 rounded-sm px-1 hover:brightness-110 transition duration-200 cursor-pointer"
                       title={tag}
                     >

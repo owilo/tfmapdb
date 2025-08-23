@@ -7,6 +7,7 @@ import MapDetail from './MapDetail';
 import AuthorList from './AuthorList';
 import AuthorProfile from './AuthorProfile';
 import CategoriesList from './CategoriesList';
+import TagDetail from './TagDetail';
 import Leaderboards from './Leaderboards';
 import "./i18n";
 
@@ -21,6 +22,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
           <Route path="authors" element={<AuthorList />} />
           <Route path="author/:name" element={<AuthorProfile />} />
           <Route path="categories" element={<CategoriesList />} />
+          <Route path="category/:id" element={<TagDetail type="category" />} />
+          <Route path="tag/:id" element={<TagDetail type="tag" />} />
           <Route path="leaderboards" element={<Leaderboards />} />
         </Route>
       </Routes>
