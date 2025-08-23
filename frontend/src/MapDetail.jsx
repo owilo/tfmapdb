@@ -24,7 +24,7 @@ function CollapsibleSection({
 }) {
   const baseTrigger =
     'flex items-center space-x-2 px-2 py-1 w-full text-start ' +
-    'bg-gray-300 text-gray-800 rounded-t-sm rounded-b-sm ' +
+    'bg-gray-200 text-gray-800 rounded-t-sm rounded-b-sm ' +
     'data-[state=open]:rounded-b-none hover:brightness-105 transition duration-200';
 
   const baseContent =
@@ -75,29 +75,28 @@ export default function MapDetail() {
 
   return (
     <>
-      <title>{`@${map.code}`}</title>
+      <title>{`@${code}`}</title>
       <meta name="author" content={map.author.name} />
-      <div className="flex flex-col h-full bg-gray-200 rounded-lg shadow-lg overflow-hidden">
-        <div className="relative bg-gray-300 text-gray-900 font-bold text-lg p-1 rounded-lg shadow-lg">
-          <Link
-            to="/gallery"
-            aria-label="Back to gallery"
-            className="absolute top-1/2 transform -translate-y-1/2 left-1 bg-gray-400 flex items-center rounded-full p-1 text-gray-600 hover:brightness-110 transition duration-200"
-          >
-            <ArrowLeft className="w-3 h-3" />
-            <span className='text-xs px-1'>{t("navigation.back_to_gallery")}</span>
-          </Link>
 
-          <h1 className="text-center font-semibold text-gray-800 text-xl">
-            @{map.code}
-          </h1>
-        </div>
+      <h1 className="px-2 mb-1 font-semibold text-2xl">
+        <span className='text-emerald-600'>@{code}</span>
+        <span className='text-gray-600'>&nbsp;by&nbsp;</span>
+        <Link
+          to={`/author/${encodeURIComponent(map.author.name)}`}
+          className='font-semibold text-sky-800 hover:text-sky-600 transition duration-200'
+        >
+          {map.author.name}
+        </Link>
+      </h1>
 
+      <hr className="border-2 border-t border-gray-500" />
+
+      <div className='my-3 px-1'>
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-3/5 flex overflow-auto flex-col border-r border-neutral-300 p-2 space-y-2">
+          <div className="w-3/5 flex overflow-auto flex-col border-r border-neutral-300 p-1 space-y-2">
             <CollapsibleSection icon={Image} title={t("map.image")} defaultOpen>
               <img
-                src={`/api/map/${map.code}/image.png`}
+                src={`/api/map/${code}/image.png`}
                 alt="Map"
                 loading="lazy"
                 className="w-full object-contain bg-[#626b8a] max-h-[300px]"
@@ -106,12 +105,12 @@ export default function MapDetail() {
 
             <CollapsibleSection icon={BookOpen} title={t("map.details")} defaultOpen contentClassName="px-2 py-1">
               <ul>
-                <li><span className='font-semibold'>{t("map.code")}</span>&nbsp;@{map.code}</li>
+                <li><span className='font-semibold'>{t("code")}</span>&nbsp;@{code}</li>
                 <li>
                   <span className='font-semibold'>{t("map.author")}</span>&nbsp;
                   <Link
                     to={`/author/${encodeURIComponent(map.author.name)}`}
-                    className='font-semibold text-sky-800 hover:text-sky-700 transition duration-200'
+                    className='font-semibold text-sky-800 hover:text-sky-600 transition duration-200'
                   >
                     {map.author.name}
                   </Link>
@@ -159,7 +158,7 @@ export default function MapDetail() {
             </CollapsibleSection>
           </div>
 
-          <div className="w-2/5 overflow-auto p-2">
+          <div className="w-2/5 overflow-auto p-1">
             <XMLViewer xml={map.xml} indentSize={2} />
           </div>
         </div>

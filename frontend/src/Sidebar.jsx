@@ -48,13 +48,13 @@ export default function Sidebar() {
           <span className="hidden sm:inline">{t("navigation.leaderboards")}</span>
         </Link>
 
-        <Link
+        {/*<Link
           to="/contests"
           className="flex items-center justify-center sm:justify-start space-x-0 sm:space-x-2 px-3 py-2 rounded hover:bg-gray-700"
         >
           <History size="1em" />
           <span className="hidden sm:inline">{t("navigation.contest_history")}</span>
-        </Link>
+        </Link>*/}
       </nav>
     </aside>
   );
