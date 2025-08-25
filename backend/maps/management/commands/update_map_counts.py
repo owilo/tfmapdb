@@ -5,7 +5,7 @@ from django.db.models import Count
 from maps.models import Map, AuthorCategoryCounter, AuthorTagCounter
 
 class Command(base.BaseCommand):
-    help = "Rebuild database counters (AuthorCategoryCounter, AuthorTagCounter) from Map data."
+    help = "Rebuild database counters (AuthorCategoryCounter, AuthorTagCounter) from Map data"
 
     def handle(self, *args, **options):
         self.stdout.write("Rebuilding counters...")
@@ -39,4 +39,6 @@ class Command(base.BaseCommand):
             if tag_objs:
                 AuthorTagCounter.objects.bulk_create(tag_objs, batch_size=1000)
 
-        self.stdout.write("Counters rebuilt successfully.")
+        self.stdout.write(
+            self.style.SUCCESS('Counters rebuilt successfully.')
+        )
