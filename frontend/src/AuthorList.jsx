@@ -43,7 +43,7 @@ export default function AuthorList() {
         {authors.map(author => (
           <div
             key={author.name}
-            className='bg-gray-200 rounded-sm shadow-lg px-2 py-1 truncate'
+            className='bg-gray-100 rounded-sm shadow-lg px-2 py-1 truncate'
           >
             <Link
               className='flex items-center font-semibold text-sky-700 hover:text-sky-500 transition duration-200'

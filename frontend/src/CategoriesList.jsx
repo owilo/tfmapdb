@@ -41,7 +41,7 @@ function ItemCard({ item, isTag = false }) {
   return (
     <div 
       key={String(idKey)} 
-      className='bg-gray-200 rounded-sm shadow-lg px-2 py-1 truncate'
+      className='bg-gray-100 rounded-sm shadow-lg px-2 py-1 truncate'
     >
       <div>
         <Link

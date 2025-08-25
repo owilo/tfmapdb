@@ -1,6 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Tag, Puzzle, ChevronDown, Search } from 'lucide-react';
+import { Funnel, Tag, Puzzle, ChevronDown, Search } from 'lucide-react';
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "./components/ui/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +25,7 @@ import categories from './assets/categories.json';
 import CategoryIcon from './CategoryIcon';
 //import TagIcon from './TagIcon';
 import './style/main.css';
+import { t } from 'i18next';
 
 export default function Searchbar({ placeholder = "" }) {
   const location = useLocation();
@@ -69,106 +75,141 @@ export default function Searchbar({ placeholder = "" }) {
     "hc", "div"
   ];
 
+  // TODO Complete
   return (
     <div className='w-full'>
       <form
         onSubmit={handleSubmit}
-        className="flex justify-center items-center p-2 bg-gray-700 rounded-xl shadow-md"
       >
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          type="search"
-          placeholder={placeholder}
-          className="flex-1 px-4 py-1 border bg-white border-gray-400 rounded-lg rounded-r-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
-        <button
-          type="submit"
-          className="px-3 py-1 bg-[#4667cf] text-white rounded-lg rounded-l-none flex items-center cursor-pointer hover:brightness-110 transition duration-200"
-        >
-          <Search size="1.5em" />
-        </button>
+        <Collapsible>
+          <div className='flex justify-center items-stretch shadow-md border-3 border-gray-400 rounded-xs'>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              type="search"
+              placeholder={placeholder}
+              className="flex-1 px-4 py-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-l-xs"
+            />
+            <CollapsibleTrigger
+              className="px-3 py-1 bg-emerald-500 text-white flex items-center cursor-pointer hover:brightness-110 data-[state=open]:brightness-120 data-[state=open]:hover:brightness-110 transition duration-200"
+              title={t("search.advanced")}
+            >
+              <Funnel size="1.25em" />
+            </CollapsibleTrigger>
+            <button
+              type="submit"
+              className="px-3 py-1 bg-[#4667cf] text-white flex items-center cursor-pointer hover:brightness-110 transition duration-200 rounded-r-xs"
+              title={t("search.search")}
+            >
+              <Search size="1.25em" />
+            </button>
+          </div>
+          <CollapsibleContent className="overflow-hidden mx-1 p-1 shadow-md border-3 border-gray-400 rounded-xs space-y-1.5 bg-gray-300 data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>Sort by:&nbsp;</span>
+              <select className="px-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-xs shadow-md">
+                <option value="code-asc">Map code (ascending)</option>
+                <option value="code-asc">Map code (descending)</option>
+                <option value="author-asc">Author (ascending)</option>
+                <option value="author-desc">Author (descending)</option>
+                <option value="category-asc">Category (ascending)</option>
+                <option value="category-desc">Category (descending)</option>
+              </select>
+            </div>
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>Code ranges:&nbsp;</span>
+              <div className='flex items-stretch shadow-md'>
+                <span className='font-bold bg-gray-400 rounded-l-xs text-gray-700 px-1 select-none'>@</span>
+                <input
+                  type="number"
+                  placeholder="Start"
+                  size="8"
+                  min="0"
+                  max="100000000"
+                  className="px-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-r-xs"
+                />
+              </div>
+              <span>&nbsp;-&nbsp;</span>
+              <div className='flex items-stretch shadow-md'>
+                <span className='font-bold bg-gray-400 rounded-l-xs text-gray-700 px-1 select-none'>@</span>
+                <input
+                  type="number"
+                  placeholder="End"
+                  size="8"
+                  min="0"
+                  max="100000000"
+                  className="px-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-r-xs"
+                />
+              </div>
+            </div>
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>Authors:&nbsp;</span>
+              <input
+                  type="text"
+                  placeholder="Author name"
+                  maxLength="32"
+                  className="px-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-xs"
+                />
+            </div>
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>Categories:&nbsp;</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className='bg-gray-100 rounded-sm px-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
+                    <Tag size="1em" className='inline' />
+                    <span className='relative -top-px'>Categories</span>
+                    <ChevronDown size="1.25em" className="inline" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64" align="start">
+                  {categoriesToDisplay.map(category => (
+                    <DropdownMenuItem>
+                      <CategoryIcon category={category} />
+                      {categories[category]?.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>Tags:&nbsp;</span>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className='bg-gray-100 rounded-sm px-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
+                    <Puzzle size="1em" className='inline' />
+                    <span className='relative -top-px'>Tags</span>
+                    <ChevronDown size="1.25em" className="inline" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64" align="start">
+                  {tagsToDisplay.map(tag => (
+                    <DropdownMenuItem>
+                      <CategoryIcon category={tag} />
+                      {categories[tag]?.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </form>
-      {/*<div className="mx-2 flex items-center justify-center gap-10 text-gray-800 text-sm">
+      {/*<div className="mt-2 mx-2 flex items-center justify-center gap-4 text-gray-800 text-sm">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className='bg-gray-300 rounded-md px-2 py-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
-              <Tag size="1.15em" className='inline' />
-              <span className='relative -top-px'>Categories</span>
+            <button className='bg-gray-100 rounded-sm px-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
+              <Funnel size="1em" className='inline' />
+              <span className='relative -top-px'>Sort</span>
               <ChevronDown size="1.25em" className="inline" />
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64" align="start">
-            {categoriesToDisplay.map(category => (
-              <DropdownMenuItem title={categories[category]?.description}>
-                <CategoryIcon category={category} />
-                {categories[category]?.name}
-              </DropdownMenuItem>
-            ))}*/}
-            {/*<DropdownMenuLabel className="font-semibold">My Account</DropdownMenuLabel>
-            <DropdownMenuGroup>
-              <DropdownMenuItem>
-                Profile
-                <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Billing
-                <DropdownMenuShortcut>⌘B</DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Settings
-                <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                Keyboard shortcuts
-                <DropdownMenuShortcut>⌘K</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuGroup>
-              <DropdownMenuItem>Team</DropdownMenuItem>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Invite users</DropdownMenuSubTrigger>
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent>
-                    <DropdownMenuItem>Email</DropdownMenuItem>
-                    <DropdownMenuItem>Message</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem>More...</DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-              <DropdownMenuItem>
-                New Team
-                <DropdownMenuShortcut>⌘+T</DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>GitHub</DropdownMenuItem>
-            <DropdownMenuItem>Support</DropdownMenuItem>
-            <DropdownMenuItem disabled>API</DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem>
-              Log out
-              <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>
-            </DropdownMenuItem>*/}
-          {/*</DropdownMenuContent>
-        </DropdownMenu>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className='bg-gray-300 rounded-md px-2 py-1 hover:bg-gray-400 transition duration-200 flex items-center gap-1'>
-              <Puzzle size="1.15em" className='inline' />
-              <span className='relative -top-px'>Tags</span>
-              <ChevronDown size="1.25em" className="inline" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-64" align="start">
-            {tagsToDisplay.map(tag => (
-              <DropdownMenuItem title={tags[tag]?.description}>
-                <TagIcon tag={tag} />
-                {tags[tag]?.name}
-              </DropdownMenuItem>
-            ))}
+              Asc
+            </DropdownMenuItem>
+            <DropdownMenuItem>
+              Desc
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>*/}

@@ -9,7 +9,7 @@ export default function MapThumbnail({ code, category, author = undefined }) {
   const { t } = useTranslation();
 
   return <div
-    className={clsx("bg-gray-200 rounded-sm shadow-lg px-2 py-1 truncate", author || "pb-2")}
+    className={clsx("bg-gray-100 rounded-sm shadow-lg px-2 py-1 truncate", author || "pb-2")}
   >
     <div className="flex justify-between items-center">
       <Link

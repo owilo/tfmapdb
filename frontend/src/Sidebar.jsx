@@ -6,7 +6,7 @@ export default function Sidebar() {
   const { t } = useTranslation();
 
   return (
-    <aside className="bg-gray-800 text-white h-screen sm:p-2 py-2 sm:w-48 w-12 transition-all duration-300">
+    <aside className="bg-gray-800 text-white h-screen sm:p-2 py-2 sm:w-48 w-12 transition-[width] duration-300">
       <nav className="space-y-2">
         <Link
           to="/gallery"

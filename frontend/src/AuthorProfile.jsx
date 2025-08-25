@@ -147,7 +147,7 @@ export default function AuthorProfile() {
             {t("author_profile.last_permed")}
             &nbsp;
             <Link
-              to={`/gallery?s=${encodeURIComponent(name)}`}
+              to={`/gallery?s=${encodeURIComponent(`${name} #p`)}`}
               className="font-semibold text-sm text-sky-900 hover:text-sky-700 transition duration-200"
             >
               ({t("navigation.see_more")})
@@ -172,7 +172,7 @@ export default function AuthorProfile() {
             {t("author_profile.last_exported")}
             &nbsp;
             <Link
-              to={`/gallery?s=${encodeURIComponent(`${name} #p`)}`}
+              to={`/gallery?s=${encodeURIComponent(name)}`}
               className="font-semibold text-sm text-sky-900 hover:text-sky-700 transition duration-200"
             >
               ({t("navigation.see_more")})
