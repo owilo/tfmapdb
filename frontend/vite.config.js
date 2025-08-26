@@ -11,8 +11,8 @@ export default defineConfig({
     tsconfigPaths()
   ],
   server: {
-    //host: true,
-    /*allowedHosts: [
+    /*host: true,
+    allowedHosts: [
       ".ngrok-free.app"
     ],*/
     proxy: {

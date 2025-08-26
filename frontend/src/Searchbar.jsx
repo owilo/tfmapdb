@@ -191,6 +191,23 @@ export default function Searchbar({ placeholder = "" }) {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>XML contains:&nbsp;</span>
+              <input
+                  type="text"
+                  size="20"
+                  placeholder="XML fragment"
+                  className="px-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-xs"
+                />
+            </div>
+            <div className='flex items-stretch'>
+              <span className='px-1 font-semibold text-gray-800'>Find similar:&nbsp;</span>
+              <input
+                  type="file"
+                  accept="image/*"
+                  className="px-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-xs"
+                />
+            </div>
           </CollapsibleContent>
         </Collapsible>
       </form>
