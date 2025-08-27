@@ -1,6 +1,13 @@
 from django.urls import path
-from django.views.generic import RedirectView
-from .views import *
+from .views.MapListView import MapListView
+from .views.MapDetailView import MapDetailView
+from .views.MapImageView import MapImageView
+from .views.AuthorListView import AuthorListView
+from .views.AuthorProfileView import AuthorProfileView
+from .views.CategoriesListView import CategoriesListView
+from .views.TagDataView import TagDataView
+from .views.TagsListView import TagsListView
+from .views.LeaderboardView import LeaderboardView
 
 urlpatterns = [
     path('gallery/', MapListView.as_view(), name='map-list'),
