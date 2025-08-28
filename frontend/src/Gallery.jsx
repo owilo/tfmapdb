@@ -43,6 +43,7 @@ export default function Gallery() {
             code={map.code}
             category={map.category}
             author={map.author_name}
+            similarity_score={map.similarity}
           />
         ))}
       </div>

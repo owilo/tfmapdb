@@ -5,11 +5,11 @@ import categories from './assets/categories.json'
 import { Trans, useTranslation } from 'react-i18next';
 import clsx from 'clsx';
 
-export default function MapThumbnail({ code, category, author = undefined }) {
+export default function MapThumbnail({ code, category, author = undefined, similarity_score = undefined }) {
   const { t } = useTranslation();
 
   return <div
-    className={clsx("bg-gray-100 rounded-sm shadow-lg px-2 py-1 truncate", author || "pb-2")}
+    className={clsx("bg-gray-100 rounded-sm shadow-lg px-2 py-1 truncate", author || similarity_score || "pb-2")}
   >
     <div className="flex justify-between items-center">
       <Link
@@ -39,20 +39,27 @@ export default function MapThumbnail({ code, category, author = undefined }) {
       </div>
     </Link>
 
+    <div className='flex justify-between items-center'>
+      {author &&
+        <div className="text-sm text-gray-600">
+          <Trans
+            i18nKey="gallery.by_user"
+            values={{ user: author }}
+            components={[
+              <Link
+                to={`/author/${encodeURIComponent(author)}`}
+                className="font-semibold text-sky-900 hover:text-sky-700 transition duration-200"
+              />
+            ]}
+          />
+        </div>
+      }
 
-    {author &&
-      <div className="text-sm text-gray-600">
-        <Trans
-          i18nKey="gallery.by_user"
-          values={{ user: author }}
-          components={[
-            <Link
-              to={`/author/${encodeURIComponent(author)}`}
-              className="font-semibold text-sky-900 hover:text-sky-700 transition duration-200"
-            />
-          ]}
-        />
-      </div>
-    }
+      {similarity_score &&
+        <div className="text-sm text-gray-600 float-right">
+          {(similarity_score * 100).toFixed(1)}%
+        </div>
+      }
+    </div>
   </div>
 }
