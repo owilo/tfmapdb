@@ -105,7 +105,7 @@ export default function MapDetail() {
 
             <CollapsibleSection icon={BookOpen} title={t("map.details")} defaultOpen contentClassName="px-2 py-1">
               <ul>
-                <li><span className='font-semibold'>{t("code")}</span>&nbsp;@{code}</li>
+                <li><span className='font-semibold'>{t("map.code")}</span>&nbsp;@{code}</li>
                 <li>
                   <span className='font-semibold'>{t("map.author")}</span>&nbsp;
                   <Link

@@ -32,7 +32,6 @@ export default function MapThumbnail({ code, category, author = undefined, simil
       <div className="w-full rounded-sm overflow-hidden bg-[#626b8a] aspect-[2/1]">
         <img
           src={`/api/map/${code}/image.png?scale=0.5`}
-          alt="Map"
           loading="lazy"
           className="w-full h-full object-contain object-center hover:brightness-110 transition duration-200"
         />

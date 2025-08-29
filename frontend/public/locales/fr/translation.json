@@ -7,7 +7,8 @@
     "leaderboards": "Classements",
     "contest_history": "Concours",
     "back_to_gallery": "Retour à la galerie",
-    "see_more": "Voir plus dans la galerie"
+    "see_more": "Voir plus dans la galerie",
+    "loading": "Chargement..."
   },
   "search": {
     "placeholder_map": "Rechercher des cartes",

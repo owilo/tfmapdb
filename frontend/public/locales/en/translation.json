@@ -7,7 +7,8 @@
     "leaderboards": "Leaderboards",
     "contest_history": "Contest history",
     "back_to_gallery": "Back to gallery",
-    "see_more": "See more in gallery"
+    "see_more": "See more in gallery",
+    "loading": "Loading..."
   },
   "gallery": {
     "title": "Map gallery",
@@ -93,6 +94,7 @@
     "no_shaman_test": "No Shaman Test",
     "inappropriate": "Inappropriate",
     "deleted": "Deleted",
+    "thematic": "Thematic",
     "thematic_storage": "Thematic Storage",
     "vanilla_storage": "Vanilla Storage"
   },
