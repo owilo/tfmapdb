@@ -4,7 +4,7 @@ import Searchbar from './Searchbar'
 import { useTranslation } from 'react-i18next';
 import MapThumbnail from './MapThumbnail'
 
-const DEFAULT_LIMIT = 25
+const DEFAULT_LIMIT = 20
 const MAX_LIMIT = 100
 
 export default function Gallery() {

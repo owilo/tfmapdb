@@ -465,6 +465,10 @@ class SearchEngine:
                         continue
                     qs = h.ensure_sort_annotation(qs, request=request)
                     key = h.sort_key or name
+
+                    if key == "similarity" and "similarity" not in qs.query.annotations:
+                        continue
+
                     if dir_ == 'asc':
                         order_fields.append(key)
                     else:
@@ -476,7 +480,7 @@ class SearchEngine:
                 if 'code' not in [f.lstrip('-') for f in order_fields]:
                     order_fields.append('-code')
                 return qs.order_by(*order_fields)
-
+            
         if 'similarity' in qs.query.annotations:
             return qs.order_by('-similarity', '-code')
 

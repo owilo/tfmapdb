@@ -5,7 +5,7 @@ from maps.search import (
 )
 from maps.serializers import MinimalMapSerializer
 from maps.models import Map
-from maps.pagination import encode_cursor, decode_cursor, build_keyset_q, default_model_field_cast
+from maps.pagination import encode_cursor, decode_cursor, build_keyset_q, default_model_field_cast, ensure_stable_ordering
 
 MAP_SEARCH_ENGINE = SearchEngine([
     SimilarityHandler(),
@@ -24,7 +24,10 @@ class MapListView(generics.ListAPIView):
     def list(self, request, *args, **kwargs):
         raw = request.GET.get('s', '').strip()
         grouped, sort_specs = MAP_SEARCH_ENGINE.parse(raw)
-
+        
+        has_similarity_tokens = bool(grouped.get('sim'))
+        has_explicit_similarity_sort = any(name == 'sim' for name, _ in sort_specs)
+        
         sort_specs = sort_specs or []
 
         try:
@@ -50,8 +53,16 @@ class MapListView(generics.ListAPIView):
                     h = MAP_SEARCH_ENGINE.handlers_by_name[name]
                     if h.sortable:
                         key = h.sort_key or name
+                        if key == 'similarity' and 'similarity' not in qs.query.annotations:
+                            continue
                         final_sort_specs.append((key, dir_))
-            if not any(k == 'code' for k, _ in final_sort_specs):
+            
+            if (has_similarity_tokens and not has_explicit_similarity_sort and 
+                'similarity' in qs.query.annotations and
+                not any(key == 'similarity' for key, _ in final_sort_specs)):
+                final_sort_specs.append(('similarity', 'desc'))
+            
+            if not any(key == 'code' for key, _ in final_sort_specs):
                 final_sort_specs.append(('code', 'desc'))
         else:
             if 'similarity' in qs.query.annotations:
@@ -67,6 +78,8 @@ class MapListView(generics.ListAPIView):
 
         order_fields = []
         for key, dir_ in final_sort_specs:
+            if key == 'similarity' and 'similarity' not in qs.query.annotations:
+                continue
             order_fields.append(key if dir_ == 'asc' else f"-{key}")
 
         qs = qs.order_by(*order_fields)
@@ -77,6 +90,8 @@ class MapListView(generics.ListAPIView):
             last_item = items[limit - 1]
             vals = []
             for key, _ in final_sort_specs:
+                if key == 'similarity' and 'similarity' not in qs.query.annotations:
+                    continue
                 parts = key.split('__')
                 v = getattr(last_item, parts[0], None)
                 for p in parts[1:]:
