@@ -2,6 +2,10 @@ import json
 import base64
 from typing import List, Any, Tuple
 from django.db.models import Q
+from rest_framework.exceptions import ValidationError
+
+DEFAULT_LIMIT = 25
+MAX_LIMIT = 100
 
 def encode_cursor(values: List[Any]) -> str:
     def default_serializer(obj):
@@ -68,13 +72,73 @@ def build_keyset_q(sort_specs: List[Tuple[str, str]], last_values: List, model_f
     
     return condition
 
-def ensure_stable_ordering(qs, sort_specs):
-    has_unique_field = any(
-        spec[0] in ['id', 'code', 'pk'] or spec[0].endswith('_id') 
-        for spec in sort_specs
-    )
+class KeysetPagination:    
+    def __init__(self, default_limit=DEFAULT_LIMIT, max_limit=MAX_LIMIT):
+        self.default_limit = default_limit
+        self.max_limit = max_limit
     
-    if not has_unique_field:
-        sort_specs = sort_specs + [('code', 'asc')]
+    def get_limit(self, request):
+        """Extract and validate limit from request"""
+        try:
+            limit = min(int(request.GET.get('limit', self.default_limit)), self.max_limit)
+            return limit if limit > 0 else self.default_limit
+        except (ValueError, TypeError):
+            return self.default_limit
     
-    return sort_specs
+    def get_cursor_values(self, request, expected_length):
+        """Extract and decode cursor from request"""
+        cursor_token = request.GET.get('cursor')
+        if not cursor_token:
+            return None
+        
+        try:
+            values = decode_cursor(cursor_token)
+            if len(values) != expected_length:
+                raise ValidationError('Invalid cursor')
+            return values
+        except Exception:
+            raise ValidationError('Invalid cursor')
+    
+    def extract_sort_specs_from_queryset(self, queryset):
+        """Extract sorting specifications from the queryset"""
+        order_by = getattr(queryset.query, 'order_by', [])
+        sort_specs = []
+        
+        for field in order_by:
+            if field.startswith('-'):
+                sort_specs.append((field[1:], 'desc'))
+            else:
+                sort_specs.append((field, 'asc'))
+        
+        return sort_specs
+    
+    def paginate_queryset(self, queryset, request):
+        """
+        Paginate a queryset using keyset pagination
+        """
+        sort_specs = self.extract_sort_specs_from_queryset(queryset)
+        
+        limit = self.get_limit(request)
+        last_values = self.get_cursor_values(request, len(sort_specs)) if sort_specs else None
+        
+        if last_values:
+            keyset_q = build_keyset_q(sort_specs, last_values, model_field_cast=default_model_field_cast)
+            queryset = queryset.filter(keyset_q)
+        
+        items = list(queryset[:limit + 1])
+        
+        next_cursor = None
+        if len(items) > limit and sort_specs:
+            last_item = items[limit - 1]
+            vals = []
+            for key, _ in sort_specs:
+                parts = key.split('__')
+                v = getattr(last_item, parts[0], None)
+                for p in parts[1:]:
+                    v = getattr(v, p, None) if v is not None else None
+                v = default_model_field_cast(key, v)
+                vals.append(v)
+            next_cursor = encode_cursor(vals)
+            items = items[:limit]
+        
+        return items, next_cursor
