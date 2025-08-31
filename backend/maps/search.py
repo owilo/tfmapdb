@@ -1,5 +1,5 @@
 import re
-import json
+import math
 from typing import List, Dict, Tuple, Optional
 from django.db.models import Q, QuerySet, F, Value, ExpressionWrapper, FloatField
 from django.core.exceptions import ObjectDoesNotExist
@@ -155,7 +155,13 @@ class CategoryHandler(TokenHandler):
     cat_re = re.compile(r"^!?[Pp#]((\d+(-\d*)?)|(-\d+))$", re.IGNORECASE)
 
     def detect(self, token: str) -> bool:
-        return bool(self.cat_re.match(token))
+        if self.cat_re.match(token):
+            return True
+        norm = token.lstrip('!Pp#').lower()
+        if norm in ('h','high','l','low','d','disc','discussion','s','standard','u','unused'):
+            return True
+        return False
+
 
     def apply(self, qs, tokens, request=None):
         if not tokens:
@@ -178,7 +184,7 @@ class CategoryHandler(TokenHandler):
         inc, exc = split_includes_excludes(tokens)
 
         def term_to_q(term):
-            norm = term.lstrip('Pp#@').strip()
+            norm = term.lstrip('Pp#').strip()
             if not norm:
                 return None
             sh = shorthand_q(norm)
@@ -228,63 +234,26 @@ class SimilarityHandler(TokenHandler):
     sortable = True
     sort_key = 'similarity'
 
-    def __init__(self, default_threshold: float = 0.85, aggregation: str = 'avg'):
+    def __init__(self, default_threshold: float = 0.85, aggregation: str = 'max'):
         self.default_threshold = float(default_threshold)
         assert aggregation in ('max', 'avg'), "aggregation must be 'max' or 'avg'"
         self.aggregation = aggregation
 
     def detect(self, token: str) -> bool:
+        # Require explicit prefix sim so no free-form detection.
         return False
 
-    def _resolve_anchor_vector_from_code(self, code_token: str):
-        code = code_token.lstrip('@!')
-        try:
-            code_int = int(code)
-        except ValueError:
-            return None
-        try:
-            m = Map.objects.only('embedding').get(code=code_int)
-        except ObjectDoesNotExist:
-            return None
-        return m.embedding
-
-    def _parse_value_and_threshold(self, raw_val: str):
-        """
-        Parse '@123', '@123~0.9', 'vec:[..]', 'vec:[..]~0.8', '[..]~0.7'
-        Returns (vec_list_or_None, threshold_float)
-        """
-        if '~' in raw_val:
-            val_part, thresh_part = raw_val.rsplit('~', 1)
+    def _parse_code_and_threshold(self, raw: str) -> Tuple[Optional[int], float]:
+        raw = raw.strip()
+        if '~' in raw:
+            val_part, thresh_part = raw.rsplit('~', 1)
             try:
                 thresh = float(thresh_part)
             except Exception:
                 thresh = self.default_threshold
         else:
-            val_part = raw_val
+            val_part = raw
             thresh = self.default_threshold
-
-        val_part = val_part.strip()
-        vec = None
-
-        if val_part.startswith('vec:'):
-            vec_text = val_part.split(':', 1)[1].strip()
-            try:
-                vec = json.loads(vec_text)
-            except Exception:
-                """try:
-                    vec = eval(vec_text)  # Avoid in prod
-                except Exception:"""
-                vec = None
-        elif val_part.startswith('['):
-            try:
-                vec = json.loads(val_part)
-            except Exception:
-                try:
-                    vec = eval(val_part)
-                except Exception:
-                    vec = None
-        else:
-            vec = self._resolve_anchor_vector_from_code(val_part)
 
         try:
             thresh = float(thresh)
@@ -292,20 +261,47 @@ class SimilarityHandler(TokenHandler):
             thresh = self.default_threshold
         thresh = max(0.0, min(1.0, thresh))
 
-        if vec is None:
+        code_txt = val_part.lstrip('@!').strip()
+        try:
+            code_int = int(code_txt)
+        except Exception:
             return None, thresh
-        return list(vec), thresh
+        return code_int, thresh
 
-    def _annotate_similarities(self, qs, vecs_and_thresholds):
-        """
-        Annotate the queryset with per-anchor similarity fields.
-        Returns (qs, similarity_field_names, any_threshold_positive, filters_q)
-        """
+    def _get_embedding_for_code(self, code_int: int):
+        try:
+            vec = Map.objects.filter(code=code_int).values_list('embedding', flat=True).get()
+        except ObjectDoesNotExist:
+            return None
+
+        if vec is None:
+            return None
+
+        try:
+            if hasattr(vec, 'tolist'):
+                vec = vec.tolist()
+            elif isinstance(vec, (bytes, bytearray, memoryview)):
+                # Defensive, unlikely for pgvector
+                vec = list(vec)
+            elif not isinstance(vec, (list, tuple)):
+                vec = list(vec)
+        except TypeError:
+            return None
+
+        validated = []
+        for x in vec:
+            try:
+                fx = float(x)
+            except Exception:
+                return None
+            if math.isnan(fx) or math.isinf(fx):
+                return None
+            validated.append(fx)
+        return validated
+
+    def _annotate_similarities(self, qs: QuerySet, vecs: List[List[float]]):
         similarity_field_names = []
-        filters_q = Q()
-        any_threshold_positive = False
-
-        for idx, (vec, thresh) in enumerate(vecs_and_thresholds):
+        for idx, vec in enumerate(vecs):
             dist_name = f"sim_dist_{idx}"
             sim_name = f"similarity_{idx}"
             qs = qs.annotate(**{dist_name: CosineDistance('embedding', vec)})
@@ -313,18 +309,13 @@ class SimilarityHandler(TokenHandler):
                 sim_name: ExpressionWrapper(Value(1.0) - F(dist_name), output_field=FloatField())
             })
             similarity_field_names.append(sim_name)
-            if thresh > 0.0:
-                any_threshold_positive = True
-                filters_q |= Q(**{f"{sim_name}__gte": float(thresh)})
 
         if len(similarity_field_names) == 1:
             qs = qs.annotate(similarity=F(similarity_field_names[0]))
         else:
             if self.aggregation == 'max':
-                greatest_expr = Greatest(*[F(name) for name in similarity_field_names])
-                qs = qs.annotate(max_similarity=greatest_expr)
-                qs = qs.annotate(similarity=F('max_similarity'))
-            else: # avg
+                qs = qs.annotate(similarity=Greatest(*[F(n) for n in similarity_field_names]))
+            else:  # avg
                 total = None
                 for name in similarity_field_names:
                     if total is None:
@@ -332,62 +323,59 @@ class SimilarityHandler(TokenHandler):
                     else:
                         total = total + F(name)
                 avg_expr = ExpressionWrapper(total / Value(len(similarity_field_names)), output_field=FloatField())
-                qs = qs.annotate(avg_similarity=avg_expr)
-                qs = qs.annotate(similarity=F('avg_similarity'))
+                qs = qs.annotate(similarity=avg_expr)
 
-        return qs, similarity_field_names, any_threshold_positive, filters_q
+        return qs, similarity_field_names
 
-    def apply(self, qs, tokens, request=None):
+    def apply(self, qs: QuerySet, tokens: List[str], request=None) -> QuerySet:
         if not tokens:
             return qs
 
-        vecs_and_thresholds = []
-        for raw in tokens:
-            vec, thresh = self._parse_value_and_threshold(raw)
+        inc_raw, exc_raw = split_includes_excludes(tokens)
+
+        parsed = []
+        for raw in inc_raw:
+            code_int, thresh = self._parse_code_and_threshold(raw)
+            if code_int is None:
+                continue
+            vec = self._get_embedding_for_code(code_int)
             if vec is None:
                 continue
-            vecs_and_thresholds.append((vec, thresh))
+            parsed.append((vec, float(thresh), 'inc'))
 
-        if not vecs_and_thresholds:
+        for raw in exc_raw:
+            code_int, thresh = self._parse_code_and_threshold(raw)
+            if code_int is None:
+                continue
+            vec = self._get_embedding_for_code(code_int)
+            if vec is None:
+                continue
+            parsed.append((vec, float(thresh), 'exc'))
+
+        if not parsed:
             return qs
 
-        qs, sim_field_names, any_threshold_positive, filters_q = self._annotate_similarities(qs, vecs_and_thresholds)
+        vecs = [item[0] for item in parsed]
+        qs, sim_field_names = self._annotate_similarities(qs, vecs)
 
-        if any_threshold_positive:
-            qs = qs.filter(filters_q)
+        inc_q = Q()
+        exc_q = Q()
+        for idx, (_, thresh, kind) in enumerate(parsed):
+            fld = f"{sim_field_names[idx]}__gte"
+            if kind == 'inc':
+                inc_q |= Q(**{fld: float(thresh)})
+            else:
+                exc_q |= Q(**{fld: float(thresh)})
+
+        if inc_q:
+            qs = qs.filter(inc_q)
+
+        if exc_q:
+            qs = qs.exclude(exc_q)
 
         return qs
 
     def ensure_sort_annotation(self, qs: QuerySet, request=None) -> QuerySet:
-        """
-        If user wants to sort by similarity but did not pass sim: tokens,
-        accept GET hints: ?sim_anchor=7411140 or ?sim_vec=[...]
-        Annotate single similarity field (similarity) so sorting works.
-        """
-        # prefer sim_vec then sim_anchor
-        sim_vec_txt = None
-        sim_anchor = None
-        if request is not None:
-            sim_vec_txt = request.GET.get('sim_vec')
-            sim_anchor = request.GET.get('sim_anchor')
-
-        vec = None
-        if sim_vec_txt:
-            try:
-                vec = json.loads(sim_vec_txt)
-            except Exception:
-                try:
-                    vec = eval(sim_vec_txt)
-                except Exception:
-                    vec = None
-        elif sim_anchor:
-            vec = self._resolve_anchor_vector_from_code(sim_anchor)
-
-        if vec is None:
-            return qs
-
-        qs = qs.annotate(sim_distance=CosineDistance('embedding', list(vec)))
-        qs = qs.annotate(similarity=ExpressionWrapper(Value(1.0) - F('sim_distance'), output_field=FloatField()))
         return qs
 
 
@@ -398,14 +386,7 @@ class SearchEngine:
         self.handlers = handlers
         self.handlers_by_name = {h.name: h for h in handlers}
 
-    SORT_RE = re.compile(r'^(?P<name>[A-Za-z_]+)-(?P<dir>asc|desc)$', re.IGNORECASE)
-
     def parse(self, raw: str):
-        """
-        Returns (grouped_tokens, sort_specs)
-        grouped_tokens: {handler_name: [val, ...], ...}
-        sort_specs: list of (name, dir) tuples in the order encountered
-        """
         grouped = {name: [] for name in self.handlers_by_name.keys()}
         sort_specs = []
         if not raw:
@@ -415,7 +396,6 @@ class SearchEngine:
         for tok in tokens:
             if tok.lower().startswith('sort:'):
                 raw_sort = tok[5:]
-                # Support comma-separated sorts in a single token: sort:author-asc,sim-desc
                 parts = [p.strip() for p in raw_sort.split(',') if p.strip()]
                 for part in parts:
                     m = SORT_RE.match(part)
@@ -432,7 +412,6 @@ class SearchEngine:
                     grouped[prefix].append(val)
                 continue
 
-            # Try detection in handler order when no specified prefix
             for h in self.handlers:
                 if h.detect(tok):
                     grouped[h.name].append(tok)
@@ -450,7 +429,6 @@ class SearchEngine:
         if not specs and request is not None:
             sort_param = request.GET.get('sort')
             if sort_param:
-                # Comma-separated sorts
                 for part in [p.strip() for p in sort_param.split(',') if p.strip()]:
                     m = SORT_RE.match(part)
                     if m:
