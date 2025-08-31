@@ -25,10 +25,10 @@ class MapListView(generics.ListAPIView):
     
     def list(self, request, *args, **kwargs):
         raw = request.GET.get('s', '').strip()
-        grouped, sort_specs = MAP_SEARCH_ENGINE.parse(raw)
+        grouped_includes, grouped_excludes, sort_specs = MAP_SEARCH_ENGINE.parse(raw)
         
         qs = super().get_queryset()
-        qs = MAP_SEARCH_ENGINE.apply(qs, grouped, sort_specs=sort_specs, request=request)
+        qs = MAP_SEARCH_ENGINE.apply(qs, grouped_includes, grouped_excludes, sort_specs=sort_specs, request=request)
         
         paginator = self.pagination_class()
         try:

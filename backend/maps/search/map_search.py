@@ -8,23 +8,19 @@ from pgvector.django import CosineDistance
 from maps.models import Map
 from maps.constants import CATEGORIES_MAP
 
-from .search_base import TokenHandler, split_includes_excludes
+from .search_base import TokenHandler
 
 class CodeHandler(TokenHandler):
     name = 'code'
     allow_prefix = True
     sortable = True
     sort_key = 'code'
-    code_re = re.compile(r"^!?((@?\d+(-@?\d*)?)|(-@?\d+))$")
+    code_re = re.compile(r"^((@?\d+(-@?\d*)?)|(-@?\d+))$")
 
     def detect(self, token: str) -> bool:
         return bool(self.code_re.match(token))
 
-    def apply(self, qs, tokens, request=None):
-        if not tokens:
-            return qs
-        inc, exc = split_includes_excludes(tokens)
-
+    def apply(self, qs, included_values, excluded_values, request=None):
         def term_to_q(term):
             norm = term.lstrip('@').strip()
             if not norm:
@@ -51,23 +47,25 @@ class CodeHandler(TokenHandler):
 
         q_obj = Q()
         any_inc = False
-        for t in inc:
+        
+        # Process included values
+        for t in included_values:
             q = term_to_q(t)
             if q is None:
                 continue
             any_inc = True
             q_obj |= q
 
-        if not any_inc and not exc:
-            return qs
-
-        for t in exc:
+        # Process excluded values
+        for t in excluded_values:
             q = term_to_q(t)
             if q is None:
                 continue
             q_obj &= ~q
 
-        return qs.filter(q_obj)
+        if any_inc or excluded_values:
+            return qs.filter(q_obj)
+        return qs
 
 
 class AuthorHandler(TokenHandler):
@@ -75,14 +73,14 @@ class AuthorHandler(TokenHandler):
     allow_prefix = True
     sortable = True
     sort_key = 'author__name'
-    author_re = re.compile(r'^!?\+?[A-Za-z]\w*(?:#\d{4})?$', re.IGNORECASE)
+    author_re = re.compile(r'^\+?[A-Za-z]\w*(?:#\d{4})?$', re.IGNORECASE)
     tag_re = re.compile(r'#(\d{4})$')
 
     def detect(self, token: str) -> bool:
         return bool(self.author_re.match(token))
 
     def _parse_author(self, raw: str):
-        name = raw.lstrip('!')
+        name = raw
         
         match = self.tag_re.search(name)
         if match:
@@ -101,14 +99,12 @@ class AuthorHandler(TokenHandler):
 
         return normalized_base, tag
 
-    def apply(self, qs, tokens, request=None):
-        if not tokens:
-            return qs
-        inc, exc = split_includes_excludes(tokens)
+    def apply(self, qs, included_values, excluded_values, request=None):
         q = Q()
         any_inc = False
         
-        for token in inc:
+        # Process included values
+        for token in included_values:
             base_name, tag = self._parse_author(token)
             if tag:
                 q |= Q(author__name=f"{base_name}#{tag}")
@@ -116,14 +112,15 @@ class AuthorHandler(TokenHandler):
                 q |= Q(author__name__regex=rf"^{re.escape(base_name)}#\d{{4}}$")
             any_inc = True
             
-        for token in exc:
+        # Process excluded values
+        for token in excluded_values:
             base_name, tag = self._parse_author(token)
             if tag:
                 q &= ~Q(author__name=f"{base_name}#{tag}")
             else:
                 q &= ~Q(author__name__regex=rf"^{re.escape(base_name)}#\d{{4}}$")
             
-        if any_inc or exc:
+        if any_inc or excluded_values:
             return qs.filter(q)
         return qs
 
@@ -133,28 +130,28 @@ class CategoryHandler(TokenHandler):
     allow_prefix = True
     sortable = True
     sort_key = 'category'
-    cat_re = re.compile(r"^!?[Pp#]((\d+(-\d*)?)|(-\d+))$", re.IGNORECASE)
+    cat_re = re.compile(r"^[Pp#]((\d+(-\d*)?)|(-\d+))$", re.IGNORECASE)
 
     def detect(self, token: str) -> bool:
         if self.cat_re.match(token):
             return True
-        norm = token.lstrip('!')[1:].lower()
+        norm = token[1:].lower() if token.startswith(('p', 'P', '#')) else token.lower()
         return norm in CATEGORIES_MAP
 
-    def apply(self, qs, tokens, request=None):
-        if not tokens:
-            return qs
-
-        inc, exc = split_includes_excludes(tokens)
-
+    def apply(self, qs, included_values, excluded_values, request=None):
         def term_to_q(term):
-            norm = term[1:].strip()
+            if term.startswith(('p', 'P', '#')):
+                norm = term[1:].strip().lower()
+            else:
+                norm = term.strip().lower()
+
             if not norm:
                 return None
-            categories = CATEGORIES_MAP.get(norm.lower())
-            sh = Q(category__in=categories) if categories else None
-            if sh is not None:
-                return sh
+
+            if norm in CATEGORIES_MAP:
+                categories = CATEGORIES_MAP[norm]
+                return Q(category__in=categories)
+                
             if '-' in norm:
                 lo, hi = norm.split('-', 1)
                 q_ = Q()
@@ -177,57 +174,58 @@ class CategoryHandler(TokenHandler):
 
         q_obj = Q()
         any_inc = False
-        for t in inc:
+        
+        # Process included values
+        for t in included_values:
             q = term_to_q(t)
             if q is None:
                 continue
             any_inc = True
             q_obj |= q
-        if not any_inc and not exc:
-            return qs
-        for t in exc:
+            
+        # Process excluded values
+        for t in excluded_values:
             q = term_to_q(t)
             if q is None:
                 continue
             q_obj &= ~q
-        return qs.filter(q_obj)
+
+        if any_inc or excluded_values:
+            return qs.filter(q_obj)
+        return qs
 
     
 class TagHandler(TokenHandler):
     name = 'tag'
     allow_prefix = True
     sortable = False
-    tag_re = re.compile(r'^!?\$[A-Za-z0-9_-]+$')
+    tag_re = re.compile(r'^\$[A-Za-z0-9_-]+$')
 
     def detect(self, token: str) -> bool:
         return bool(self.tag_re.match(token))
 
-    def apply(self, qs: QuerySet, tokens: List[str], request=None) -> QuerySet:
-        if not tokens:
-            return qs
-
-        inc, exc = split_includes_excludes(tokens)
-
+    def apply(self, qs: QuerySet, included_values: List[str], excluded_values: List[str], request=None) -> QuerySet:
         q_obj = Q()
         any_inc = False
 
-        for t in inc:
-            norm = t.lstrip('!').lstrip('$').strip()
+        # Process included values
+        for t in included_values:
+            norm = t.lstrip('$').strip()
             if not norm:
                 continue
             any_inc = True
             q_obj |= Q(tags__contains=[norm])
 
-        if not any_inc and not exc:
-            return qs
-
-        for t in exc:
-            norm = t.lstrip('!').lstrip('$').strip()
+        # Process excluded values
+        for t in excluded_values:
+            norm = t.lstrip('$').strip()
             if not norm:
                 continue
             q_obj &= ~Q(tags__contains=[norm])
 
-        return qs.filter(q_obj)
+        if any_inc or excluded_values:
+            return qs.filter(q_obj)
+        return qs
 
 
 class SimilarityHandler(TokenHandler):
@@ -262,7 +260,7 @@ class SimilarityHandler(TokenHandler):
             thresh = self.default_threshold
         thresh = max(0.0, min(1.0, thresh))
 
-        code_txt = val_part.lstrip('@!').strip()
+        code_txt = val_part.lstrip('@').strip()
         try:
             code_int = int(code_txt)
         except Exception:
@@ -297,27 +295,25 @@ class SimilarityHandler(TokenHandler):
 
         return qs, similarity_field_names
 
-    def apply(self, qs: QuerySet, tokens: List[str], request=None) -> QuerySet:
-        if not tokens:
-            return qs
-
-        inc_raw, exc_raw = split_includes_excludes(tokens)
-
+    def apply(self, qs: QuerySet, included_values: List[str], excluded_values: List[str], request=None) -> QuerySet:
         parsed = []
-        for raw in inc_raw:
+        
+        # Process included values
+        for raw in included_values:
             code_int, thresh = self._parse_code_and_threshold(raw)
             if code_int is None:
                 continue
-            vec = Map.objects.filter(code=code_int).values_list('embedding', flat=True).get()
+            vec = Map.objects.filter(code=code_int).values_list('embedding', flat=True).first()
             if vec is None:
                 continue
             parsed.append((vec, float(thresh), 'inc'))
 
-        for raw in exc_raw:
+        # Process excluded values
+        for raw in excluded_values:
             code_int, thresh = self._parse_code_and_threshold(raw)
             if code_int is None:
                 continue
-            vec = Map.objects.filter(code=code_int).values_list('embedding', flat=True).get()
+            vec = Map.objects.filter(code=code_int).values_list('embedding', flat=True).first()
             if vec is None:
                 continue
             parsed.append((vec, float(thresh), 'exc'))

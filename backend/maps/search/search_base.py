@@ -16,24 +16,9 @@ class TokenHandler:
         """Normalize the token value (strip flags). Return handler-specific value(s)."""
         return token_value
 
-    def apply(self, qs: QuerySet, values: List[str], request=None) -> QuerySet:
+    def apply(self, qs: QuerySet, included_values: List[str], excluded_values: List[str], request=None) -> QuerySet:
         """Apply filtering for these token values and return modified queryset."""
         return qs
-
-def split_includes_excludes(tokens: List[str]) -> Tuple[List[str], List[str]]:
-    """
-    Split a list of token strings into (includes, excludes).
-    Tokens beginning with '!' are considered excludes and the '!' is stripped for further parsing.
-    """
-    inc, exc = [], []
-    for t in tokens:
-        if not t:
-            continue
-        if t.startswith('!'):
-            exc.append(t[1:])
-        else:
-            inc.append(t)
-    return inc, exc
 
 SORT_RE = re.compile(r'^(?P<name>[A-Za-z_]+)-(?P<dir>asc|desc)$', re.IGNORECASE)
 
@@ -48,20 +33,22 @@ class SearchEngine:
 
     def parse(self, raw: str):
         """
-        Returns (grouped_tokens, sort_specs)
-        grouped_tokens: {handler_name: [val, ...], ...}
+        Returns (grouped_includes, grouped_excludes, sort_specs)
+        grouped_includes: {handler_name: [val, ...], ...}
+        grouped_excludes: {handler_name: [val, ...], ...}
         sort_specs: list of (name, dir) tuples in the order encountered
         """
-        grouped = {name: [] for name in self.handlers_by_name.keys()}
+        grouped_includes = {name: [] for name in self.handlers_by_name.keys()}
+        grouped_excludes = {name: [] for name in self.handlers_by_name.keys()}
         sort_specs = []
         if not raw:
-            return grouped, sort_specs
+            return grouped_includes, grouped_excludes, sort_specs
 
         tokens = [t for t in re.split(r'\s+', raw.strip()) if t]
         for tok in tokens:
+            # Handle sort tokens first
             if tok.lower().startswith('sort:'):
                 raw_sort = tok[5:]
-                # Support comma-separated sorts in a single token: sort:author-asc,sim-desc
                 parts = [p.strip() for p in raw_sort.split(',') if p.strip()]
                 for part in parts:
                     m = SORT_RE.match(part)
@@ -71,28 +58,41 @@ class SearchEngine:
                         sort_specs.append((name, dir_))
                 continue
 
-            if ':' in tok:
-                prefix, val = tok.split(':', 1)
+            # Check for exclude prefix
+            is_exclude = tok.startswith('!')
+            clean_tok = tok[1:] if is_exclude else tok
+
+            if ':' in clean_tok:
+                prefix, val = clean_tok.split(':', 1)
                 prefix = prefix.lower()
                 if prefix in self.handlers_by_name:
-                    grouped[prefix].append(val)
+                    if is_exclude:
+                        grouped_excludes[prefix].append(val)
+                    else:
+                        grouped_includes[prefix].append(val)
                 continue
 
+            # Handle unprefixed tokens
             for h in self.handlers:
-                if h.detect(tok):
-                    grouped[h.name].append(tok)
+                if h.detect(clean_tok):
+                    if is_exclude:
+                        grouped_excludes[h.name].append(clean_tok)
+                    else:
+                        grouped_includes[h.name].append(clean_tok)
                     break
-        return grouped, sort_specs
 
-    def apply_filters(self, qs: QuerySet, grouped_tokens: Dict[str, List[str]], request=None) -> QuerySet:
+        return grouped_includes, grouped_excludes, sort_specs
+
+    def apply_filters(self, qs: QuerySet, grouped_includes: Dict[str, List[str]], grouped_excludes: Dict[str, List[str]], request=None) -> QuerySet:
         """
         Apply handlers' filtering in the order handlers are declared.
-        Returns the filtered queryset (no ordering changes here).
+        Returns the filtered queryset with no ordering changes here.
         """
         for h in self.handlers:
-            toks = grouped_tokens.get(h.name) or []
-            if toks:
-                qs = h.apply(qs, toks, request=request)
+            included = grouped_includes.get(h.name) or []
+            excluded = grouped_excludes.get(h.name) or []
+            if included or excluded:
+                qs = h.apply(qs, included, excluded, request=request)
         return qs
 
     def _is_orderable_field(self, qs: QuerySet, field_name: str) -> bool:
@@ -158,7 +158,7 @@ class SearchEngine:
         
         return qs
 
-    def apply(self, qs: QuerySet, grouped_tokens: Dict[str, List[str]], sort_specs: Optional[List[Tuple[str,str]]] = None, request=None) -> QuerySet:
-        qs = self.apply_filters(qs, grouped_tokens=grouped_tokens, request=request)
+    def apply(self, qs: QuerySet, grouped_includes: Dict[str, List[str]], grouped_excludes: Dict[str, List[str]], sort_specs: Optional[List[Tuple[str,str]]] = None, request=None) -> QuerySet:
+        qs = self.apply_filters(qs, grouped_includes, grouped_excludes, request=request)
         qs = self.apply_sorting(qs, sort_specs=sort_specs, request=request)
         return qs
