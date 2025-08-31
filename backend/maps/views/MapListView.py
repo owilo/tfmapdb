@@ -4,13 +4,14 @@ from rest_framework.exceptions import ValidationError
 from maps.serializers import MinimalMapSerializer
 from maps.models import Map
 from maps.pagination import KeysetPagination
-from maps.search.map_search import CodeHandler, AuthorHandler, CategoryHandler, SimilarityHandler
+from maps.search.map_search import CodeHandler, AuthorHandler, CategoryHandler, TagHandler, SimilarityHandler
 from maps.search.search_base import SearchEngine
 
 MAP_SEARCH_ENGINE = SearchEngine(
     handlers=[
         CodeHandler(),
         CategoryHandler(),
+        TagHandler(),
         AuthorHandler(),
         SimilarityHandler(),
     ],

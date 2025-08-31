@@ -138,7 +138,7 @@ class CategoryHandler(TokenHandler):
     def detect(self, token: str) -> bool:
         if self.cat_re.match(token):
             return True
-        norm = token.lstrip('!Pp#').lower()
+        norm = token.lstrip('!')[1:].lower()
         return norm in CATEGORIES_MAP
 
     def apply(self, qs, tokens, request=None):
@@ -148,7 +148,7 @@ class CategoryHandler(TokenHandler):
         inc, exc = split_includes_excludes(tokens)
 
         def term_to_q(term):
-            norm = term.lstrip('Pp#').strip()
+            norm = term[1:].strip()
             if not norm:
                 return None
             categories = CATEGORIES_MAP.get(norm.lower())
@@ -190,6 +190,43 @@ class CategoryHandler(TokenHandler):
             if q is None:
                 continue
             q_obj &= ~q
+        return qs.filter(q_obj)
+
+    
+class TagHandler(TokenHandler):
+    name = 'tag'
+    allow_prefix = True
+    sortable = False
+    tag_re = re.compile(r'^!?\$[A-Za-z0-9_-]+$')
+
+    def detect(self, token: str) -> bool:
+        return bool(self.tag_re.match(token))
+
+    def apply(self, qs: QuerySet, tokens: List[str], request=None) -> QuerySet:
+        if not tokens:
+            return qs
+
+        inc, exc = split_includes_excludes(tokens)
+
+        q_obj = Q()
+        any_inc = False
+
+        for t in inc:
+            norm = t.lstrip('!').lstrip('$').strip()
+            if not norm:
+                continue
+            any_inc = True
+            q_obj |= Q(tags__contains=[norm])
+
+        if not any_inc and not exc:
+            return qs
+
+        for t in exc:
+            norm = t.lstrip('!').lstrip('$').strip()
+            if not norm:
+                continue
+            q_obj &= ~Q(tags__contains=[norm])
+
         return qs.filter(q_obj)
 
 

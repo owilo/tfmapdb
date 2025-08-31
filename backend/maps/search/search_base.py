@@ -118,17 +118,14 @@ class SearchEngine:
             return False
 
     def apply_sorting(self, qs: QuerySet, sort_specs: Optional[List[Tuple[str,str]]] = None, request=None) -> QuerySet:
-        """
-        First behave like before for explicit sort_specs (honor handlers and annotations).
-        If explicit produced no order_fields, attempt fallback_order (declarative list).
-        """
-        specs = list(sort_specs)
+        specs = list(sort_specs) if sort_specs else []
 
         final_order_fields = []
         
         if specs:
             order_fields = []
             for name, dir_ in specs:
+                name = name.lower()
                 if name in self.handlers_by_name:
                     h = self.handlers_by_name[name]
                     if not h.sortable:
@@ -136,11 +133,13 @@ class SearchEngine:
                     key = h.sort_key or name
                     if self._is_orderable_field(qs, key):
                         order_fields.append(key if dir_ == 'asc' else f"-{key}")
-            
+                else:
+                    if self._is_orderable_field(qs, name):
+                        order_fields.append(name if dir_ == 'asc' else f"-{name}")
             if order_fields:
                 final_order_fields.extend(order_fields)
         
-        if self.fallback_order and (final_order_fields or not specs):
+        if self.fallback_order:
             fallback_order_fields = []
             working_qs = qs
             for raw_field in self.fallback_order:

@@ -78,7 +78,7 @@ export default function AuthorProfile() {
           <span>
             {t("author_profile.perm_count")}&nbsp;
             <Link
-              to={`/gallery?s=${encodeURIComponent(`${name} #h`)}`}
+              to={`/gallery?s=${encodeURIComponent(`${name} #p`)}`}
               className="font-semibold text-sky-900 hover:text-sky-700 transition duration-200"
             >
               {author.permed_maps}
