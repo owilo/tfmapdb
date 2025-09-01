@@ -1,3 +1,5 @@
+# search_base.py (modified)
+
 import re
 from typing import List, Dict, Tuple, Optional
 from django.db.models import QuerySet
@@ -12,6 +14,12 @@ class TokenHandler:
         """Return True if this handler recognizes token without an explicit prefix."""
         return False
 
+    def detect_sort_name(self, sort_name: str) -> bool:
+        """
+        Return True if this handler can handle a sort token named `sort_name`.
+        """
+        return False
+
     def parse_value(self, token_value: str):
         """Normalize the token value (strip flags). Return handler-specific value(s)."""
         return token_value
@@ -20,7 +28,21 @@ class TokenHandler:
         """Apply filtering for these token values and return modified queryset."""
         return qs
 
-SORT_RE = re.compile(r'^(?P<name>[A-Za-z_]+)-(?P<dir>asc|desc)$', re.IGNORECASE)
+    def prepare_sort(self, qs: QuerySet, sort_name: str, direction: str, request=None):
+        """
+        Optionally annotate the queryset and return a field name that can be used for ordering.
+        If the handler cannot prepare sorting for sort_name, return (qs, None).
+        Default behaviour uses self.sort_key if present and sortable.
+        Handlers may return a modified queryset (with annotations) and the field name string.
+        """
+        if not self.sortable:
+            return qs, None
+        if self.sort_key:
+            return qs, self.sort_key
+        return qs, None
+
+
+SORT_RE = re.compile(r'^(?P<name>.+)-(?P<dir>asc|desc)$', re.IGNORECASE)
 
 class SearchEngine:
     """
@@ -53,7 +75,7 @@ class SearchEngine:
                 for part in parts:
                     m = SORT_RE.match(part)
                     if m:
-                        name = m.group('name').lower()
+                        name = m.group('name').strip()
                         dir_ = m.group('dir').lower()
                         sort_specs.append((name, dir_))
                 continue
@@ -124,18 +146,36 @@ class SearchEngine:
         
         if specs:
             order_fields = []
-            for name, dir_ in specs:
-                name = name.lower()
-                if name in self.handlers_by_name:
-                    h = self.handlers_by_name[name]
-                    if not h.sortable:
+            for raw_name, dir_ in specs:
+                name = raw_name
+                lname = name.lower()
+                # Exact handler name match first
+                if lname in self.handlers_by_name:
+                    h = self.handlers_by_name[lname]
+                    # Allow handler to prepare (annotate) and supply a key
+                    qs, key = h.prepare_sort(qs, name, dir_, request=request)
+                    if not key:
                         continue
-                    key = h.sort_key or name
                     if self._is_orderable_field(qs, key):
                         order_fields.append(key if dir_ == 'asc' else f"-{key}")
                 else:
-                    if self._is_orderable_field(qs, name):
-                        order_fields.append(name if dir_ == 'asc' else f"-{name}")
+                    # Ask handlers whether they can handle this sort token dynamically
+                    key_selected = None
+                    working_qs = qs
+                    for h in self.handlers:
+                        if h.detect_sort_name(name):
+                            working_qs, key = h.prepare_sort(working_qs, name, dir_, request=request)
+                            if key and self._is_orderable_field(working_qs, key):
+                                key_selected = (working_qs, key)
+                                break
+                    if key_selected:
+                        qs = key_selected[0]
+                        key = key_selected[1]
+                        order_fields.append(key if dir_ == 'asc' else f"-{key}")
+                    else:
+                        # maybe the name refers to a raw model field
+                        if self._is_orderable_field(qs, name):
+                            order_fields.append(name if dir_ == 'asc' else f"-{name}")
             if order_fields:
                 final_order_fields.extend(order_fields)
         
