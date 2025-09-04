@@ -1,6 +1,7 @@
 from lxml import etree
 from PIL import Image, ImageDraw
 import math
+import numpy as np
 
 def extract_map_data(map_xml):
     root = etree.fromstring(map_xml)
@@ -21,6 +22,49 @@ def extract_map_data(map_xml):
         "length": length,
         "height": height
     }
+
+def get_spawn_point(map_xml):
+    root = etree.fromstring(map_xml)
+
+    decorations = root.xpath("Z/D")
+
+    spawns = []
+    holes = []
+    for deco in decorations:
+        spawns.extend(deco.xpath("DS"))
+        holes.extend(deco.xpath("T"))
+
+    if spawns:
+        return np.array([float(spawns[0].get("X")), float(spawns[0].get("Y"))])
+    elif holes:
+        return np.array([float(holes[0].get("X")), float(holes[0].get("Y"))])
+    else:
+        return None
+
+
+def is_autowin(map_xml):
+    spawn_point = get_spawn_point(map_xml)
+    if spawn_point is None:
+        return False
+    root = etree.fromstring(map_xml)
+
+    decorations = root.xpath("Z/D")
+
+    holes = []
+    cheeses = []
+    for deco in decorations:
+        holes.extend(deco.xpath("T"))
+        cheeses.extend(deco.xpath("F"))
+
+    for cheese in cheeses:
+        cheese_coordinates = np.array([float(cheese.get("X")), float(cheese.get("Y"))])
+        if np.linalg.norm(cheese_coordinates - spawn_point) <= 30:
+            for hole in holes:
+                hole_coordinates = np.array([float(hole.get("X")), float(hole.get("Y"))])
+                if np.linalg.norm(hole_coordinates - spawn_point) <= 30:
+                    return True
+            return False
+    return False
 
 # TODO rework
 def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 255)):
