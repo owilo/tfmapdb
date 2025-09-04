@@ -117,6 +117,9 @@
     "hardcamp": "Hardcamp",
     "divinity": "Divinity"
   },
+  "tags": {
+    "autowin": "Auto-win"
+  },
   "info": {
     "map_count_one": "<0>{{count}}</0> map",
     "map_count_other": "<0>{{count}}</0> maps",

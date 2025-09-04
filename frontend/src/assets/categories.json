@@ -142,5 +142,9 @@
     "div": {
         "name": "modules.divinity",
         "image": "modules/divinity.webp"
+    },
+    "autowin": {
+        "name": "tags.autowin",
+        "image": "other/rulebreaking.webp"
     }
 }

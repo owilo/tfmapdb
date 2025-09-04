@@ -122,6 +122,9 @@
     "hardcamp": "Hardcamp",
     "divinity": "Divinity"
   },
+  "tags": {
+    "autowin": "Victoire automatique"
+  },
   "info": {
     "map_count": "<0>{{count}}</0> carte",
     "map_count_other": "<0>{{count}}</0> cartes",
