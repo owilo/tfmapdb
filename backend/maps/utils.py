@@ -67,17 +67,28 @@ def is_autowin(map_xml):
     return False
 
 # TODO rework
+from PIL import Image, ImageDraw
+import xml.etree.ElementTree as ET
+import math
+from typing import Optional, Tuple, List
+
 def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 255)):
+    """
+    Render the XML structure to a PIL RGBA image.
+    """
+
     palette = [
-        "a87f56", "89a5b8", "5a3879", "ad2a00", "5b240b", "563018", "8ba417", "f3d45f", "dddddd", "51a0a5", "797568", "e6eff0", "324650", "324650", "000000", "c4c8d1", "a87f56", "c69e1b", "c99fb3", "59c012", "fbd310", "2c0054"
+        "a87f56", "89a5b8", "5a3879", "ad2a00", "5b240b", "563018", "8ba417", "f3d45f",
+        "dddddd", "51a0a5", "797568", "e6eff0", "324650", "324650", "000000", "c4c8d1",
+        "a87f56", "c69e1b", "c99fb3", "59c012", "fbd310", "2c0054"
     ]
 
-    def hex_to_rgba(hexstr, alpha=1.0):
+    def hex_to_rgba(hexstr: Optional[str], alpha: float = 1.0) -> Tuple[int, int, int, int]:
         if not hexstr:
             hexstr = "000000"
         hs = hexstr.strip().lstrip("#")
         if len(hs) == 3:
-            hs = ''.join(2*c for c in hs)
+            hs = ''.join(2 * c for c in hs)
         hs = (hs + "000000")[:6]
         try:
             r = int(hs[0:2], 16)
@@ -85,41 +96,101 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
             b = int(hs[4:6], 16)
         except Exception:
             r, g, b = 0, 0, 0
-        a = int(round(max(0.0, min(1.0, alpha)) * 255))
+        a = int(round(max(0.0, min(1.0, float(alpha))) * 255))
         return (r, g, b, a)
 
     def parse_float_attr(elem, name, default=0.0):
         v = elem.get(name)
-        if v is None:
+        if v is None or v == "":
             return default
         try:
             return float(v)
         except Exception:
             return default
 
+    def safe_alpha_composite(base: Image.Image, overlay: Image.Image, xy: Tuple[int, int]):
+        ox, oy = int(xy[0]), int(xy[1])
+        if overlay.width == 0 or overlay.height == 0:
+            return
+        left_crop = max(0, -ox)
+        top_crop = max(0, -oy)
+        right_overflow = max(0, ox + overlay.width - base.width)
+        bottom_overflow = max(0, oy + overlay.height - base.height)
+        crop_left = left_crop
+        crop_top = top_crop
+        crop_right = overlay.width - right_overflow
+        crop_bottom = overlay.height - bottom_overflow
+
+        if crop_right <= crop_left or crop_bottom <= crop_top:
+            return
+
+        if crop_left != 0 or crop_top != 0 or right_overflow != 0 or bottom_overflow != 0:
+            overlay = overlay.crop((crop_left, crop_top, crop_right, crop_bottom))
+            ox = max(0, ox)
+            oy = max(0, oy)
+
+        base.alpha_composite(overlay, dest=(ox, oy))
+
     if isinstance(xml_str, str):
         xml_bytes = xml_str.encode("utf-8")
     else:
         xml_bytes = xml_str
-    tree = etree.fromstring(xml_bytes)
+    root = ET.fromstring(xml_bytes)
 
-    z = tree.find('Z')
-    if z is None:
-        z_nodes = tree.xpath('Z')
-        if not z_nodes:
+    z_nodes = root.findall('Z')
+    if not z_nodes:
+        if root.tag == 'Z':
+            z = root
+        else:
             raise ValueError("Cannot find Z element in XML")
+    else:
         z = z_nodes[0]
+
+    scaled_size = (int(round(size[0] * scale)), int(round(size[1] * scale)))
+    img = Image.new("RGBA", scaled_size, bgcolor)
+
+    tf_items = []
+    ds_items = []
+    for d in z.findall('D'):
+        for child in list(d):
+            tag = child.tag
+            if tag in ("T", "F"):
+                x = parse_float_attr(child, "X", 0.0) * scale
+                y = parse_float_attr(child, "Y", 0.0) * scale
+                tf_items.append((tag, x, y))
+            elif tag == "DS":
+                x = parse_float_attr(child, "X", 0.0) * scale
+                y = parse_float_attr(child, "Y", 0.0) * scale
+                ds_items.append((tag, x, y))
+
+    def draw_marker_circle(image: Image.Image, cx: float, cy: float, diam: float, color_hex: str):
+        d = max(1, int(round(diam)))
+        temp = Image.new("RGBA", (d, d), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(temp)
+        draw.ellipse([0, 0, d - 1, d - 1], fill=hex_to_rgba(color_hex, alpha=1.0))
+        paste_x = int(round(cx - d / 2.0))
+        paste_y = int(round(cy - d / 2.0))
+        safe_alpha_composite(image, temp, (paste_x, paste_y))
+
+    for tag, x, y in tf_items:
+        if tag == "T":
+            draw_marker_circle(img, x, y, 30 * scale, "332117")
+        else:  # F
+            draw_marker_circle(img, x, y, 24 * scale, "E8B95B")
+
+    for _tag, x, y in ds_items:
+        draw_marker_circle(img, x, y, 24 * scale, "503B24")
 
     s_container = z.find('S')
     s_elems_all = s_container.findall('S') if s_container is not None else z.findall('S')
 
-    s_positions = []
+    s_positions: List[Tuple[float, float]] = []
     for s in s_elems_all:
         Xf = parse_float_attr(s, "X", 0.0)
         Yf = parse_float_attr(s, "Y", 0.0)
         s_positions.append((Xf, Yf))
 
-    def parse_joint_c_attr(c_attr):
+    def parse_joint_c_attr(c_attr: Optional[str]):
         if not c_attr:
             return None
         parts = [p.strip() for p in c_attr.split(",")]
@@ -136,7 +207,11 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
             return None
         if thickness <= 0 or opacity <= 0:
             return None
-        return (color_hex.lstrip('#'), thickness, opacity, int(foreground_str or "0"))
+        try:
+            fg = int(foreground_str or "0")
+        except Exception:
+            fg = 0
+        return (color_hex.lstrip('#'), thickness, opacity, bool(fg))
 
     jd_container = z.find('L')
     jds = []
@@ -151,15 +226,12 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
                 'color_hex': color_hex,
                 'thickness': thickness,
                 'opacity': opacity,
-                'foreground': bool(fg),
+                'foreground': fg,
                 'P1': jd.get('P1'),
                 'P2': jd.get('P2'),
                 'M1': jd.get('M1'),
                 'M2': jd.get('M2'),
             })
-
-    scaled_size = (int(round(size[0] * scale)), int(round(size[1] * scale)))
-    img = Image.new("RGBA", scaled_size, bgcolor)
 
     grounds = []
     for idx, s in enumerate(s_elems_all):
@@ -172,15 +244,18 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
             t_index = int(s.get('T')) if s.get('T') is not None else 0
         except Exception:
             t_index = 0
+
         draw_flag = True
         if t_index == 14 or skip_due_to_m:
             draw_flag = False
+
         if t_index in (8, 9):
             opacity = 0.7
         elif t_index == 15:
             opacity = 0.9
         else:
             opacity = 1.0
+
         color_hex = palette[t_index] if (0 <= t_index < len(palette)) else palette[0]
         if t_index in (12, 13):
             o_attr = s.get('o')
@@ -188,22 +263,20 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
                 color_hex = o_attr.strip().lstrip('#')
             else:
                 draw_flag = False
+
         color_rgba = hex_to_rgba(color_hex, alpha=opacity)
 
         angle = 0.0
         P = s.get('P', '')
         if P:
-            parts = P.split(",")
+            parts = [p.strip() for p in P.split(",") if p.strip() != ""]
             if len(parts) >= 5:
                 try:
                     angle = float(parts[4])
                 except Exception:
                     angle = 0.0
 
-        N = s.get('N')
-        foreground = False
-        if N is not None and N != "" and N != "0":
-            foreground = True
+        foreground = ('N' in s.attrib)
 
         grounds.append({
             'elem': s,
@@ -221,10 +294,14 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
             'foreground': bool(foreground),
         })
 
-    def resolve_jd_point(P_attr, M_attr):
+    def resolve_jd_point(P_attr: Optional[str], M_attr: Optional[str]):
         if P_attr:
             try:
-                px, py = [float(c.strip()) for c in P_attr.split(',')]
+                px_txt = P_attr.strip()
+                parts = [c.strip() for c in px_txt.split(",") if c.strip() != ""]
+                if len(parts) < 2:
+                    return None
+                px, py = float(parts[0]), float(parts[1])
                 return (px * scale, py * scale)
             except Exception:
                 return None
@@ -234,13 +311,11 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
                 if 0 <= mi < len(s_positions):
                     x_raw, y_raw = s_positions[mi]
                     return (x_raw * scale, y_raw * scale)
-                else:
-                    return None
             except Exception:
                 return None
         return None
 
-    def draw_capsule(main_img, p1, p2, thickness, color_rgba):
+    def draw_capsule(main_img: Image.Image, p1, p2, thickness, color_rgba):
         if main_img.mode != "RGBA":
             raise ValueError("main_img must be RGBA")
 
@@ -254,32 +329,19 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
         length = math.hypot(dx, dy)
 
         if length <= 1e-6:
-            x0 = x1 - r
-            y0 = y1 - r
-            x1b = x1 + r
-            y1b = y1 + r
-            bx0 = max(0, int(math.floor(x0)))
-            by0 = max(0, int(math.floor(y0)))
-            bx1 = min(main_img.width, int(math.ceil(x1b)))
-            by1 = min(main_img.height, int(math.ceil(y1b)))
-            if bx1 <= bx0 or by1 <= by0:
-                return
-            tw = bx1 - bx0
-            th = by1 - by0
-            temp = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
+            diameter = max(1, int(math.ceil(t)))
+            temp = Image.new("RGBA", (diameter, diameter), (0, 0, 0, 0))
             draw = ImageDraw.Draw(temp)
-            cx = (x1 - bx0)
-            cy = (y1 - by0)
-            draw.ellipse([cx - r, cy - r, cx + r, cy + r], fill=color_rgba)
-            main_img.alpha_composite(temp, (bx0, by0))
+            draw.ellipse([0, 0, diameter - 1, diameter - 1], fill=color_rgba)
+            paste_x = int(round(x1 - diameter / 2.0))
+            paste_y = int(round(y1 - diameter / 2.0))
+            safe_alpha_composite(main_img, temp, (paste_x, paste_y))
             return
 
         ux = dx / length
         uy = dy / length
-
         px = -uy
         py = ux
-
         ox = px * r
         oy = py * r
 
@@ -296,16 +358,16 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
         x1b = max(xs) + 1.0
         y1b = max(ys) + 1.0
 
-        bx0 = max(0, int(math.floor(x0)))
-        by0 = max(0, int(math.floor(y0)))
-        bx1 = min(main_img.width, int(math.ceil(x1b)))
-        by1 = min(main_img.height, int(math.ceil(y1b)))
-
-        if bx1 <= bx0 or by1 <= by0:
-            return
+        bx0 = int(math.floor(x0))
+        by0 = int(math.floor(y0))
+        bx1 = int(math.ceil(x1b))
+        by1 = int(math.ceil(y1b))
 
         tw = bx1 - bx0
         th = by1 - by0
+        if tw <= 0 or th <= 0:
+            return
+
         temp = Image.new("RGBA", (tw, th), (0, 0, 0, 0))
         draw = ImageDraw.Draw(temp)
 
@@ -313,14 +375,14 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
         rB = (pB[0] - bx0, pB[1] - by0)
         rC = (pC[0] - bx0, pC[1] - by0)
         rD = (pD[0] - bx0, pD[1] - by0)
-        rp1 = (p1[0] - bx0, p1[1] - by0)
-        rp2 = (p2[0] - bx0, p2[1] - by0)
+        rp1 = (x1 - bx0, y1 - by0)
+        rp2 = (x2 - bx0, y2 - by0)
 
         draw.polygon([rA, rB, rC, rD], fill=color_rgba)
         draw.ellipse([rp1[0] - r, rp1[1] - r, rp1[0] + r, rp1[1] + r], fill=color_rgba)
         draw.ellipse([rp2[0] - r, rp2[1] - r, rp2[0] + r, rp2[1] + r], fill=color_rgba)
 
-        main_img.alpha_composite(temp, (bx0, by0))
+        safe_alpha_composite(main_img, temp, (bx0, by0))
 
     joints_bg = []
     joints_fg = []
@@ -342,12 +404,13 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
     grounds_bg = [s for s in grounds if (not s['foreground']) and s['draw']]
     grounds_fg = [s for s in grounds if s['foreground'] and s['draw']]
 
+    # ---- draw layers ----
     # Layer 1: joints (background)
     for cap in joints_bg:
         draw_capsule(img, cap['p1'], cap['p2'], cap['thickness'], cap['color_rgba'])
 
     # Layer 2: grounds (background)
-    def draw_ground_item(image, s):
+    def draw_ground_item(image: Image.Image, s):
         t_index = s['T']
         color_rgba = s['color_rgba']
         Xs = s['X'] * scale
@@ -357,13 +420,13 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
             radius = s['L'] * scale
             if radius <= 0:
                 return
-            diameter = max(1, int(math.ceil(radius * 2)))
+            diameter = max(1, int(math.ceil(radius * 2.0)))
             temp = Image.new("RGBA", (diameter, diameter), (0, 0, 0, 0))
             draw = ImageDraw.Draw(temp)
             draw.ellipse([0, 0, diameter - 1, diameter - 1], fill=color_rgba)
             paste_x = int(round(Xs - diameter / 2.0))
             paste_y = int(round(Ys - diameter / 2.0))
-            image.alpha_composite(temp, (paste_x, paste_y))
+            safe_alpha_composite(image, temp, (paste_x, paste_y))
             return
 
         Ls = s['L'] * scale
@@ -372,14 +435,16 @@ def xml_to_image(xml_str, size=(400, 200), scale=1.0, bgcolor=(106, 116, 149, 25
         h = max(1, int(math.ceil(Hs)))
         if w <= 0 or h <= 0:
             return
+
         rect = Image.new("RGBA", (w, h), (0, 0, 0, 0))
         draw = ImageDraw.Draw(rect)
         draw.rectangle([0, 0, w - 1, h - 1], fill=color_rgba)
+
         rot = rect.rotate(-s['angle'], expand=True)
         rw, rh = rot.size
         paste_x = int(round(Xs - rw / 2.0))
         paste_y = int(round(Ys - rh / 2.0))
-        image.alpha_composite(rot, (paste_x, paste_y))
+        safe_alpha_composite(image, rot, (paste_x, paste_y))
 
     for s in grounds_bg:
         draw_ground_item(img, s)
