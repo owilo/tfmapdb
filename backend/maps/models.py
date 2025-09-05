@@ -29,12 +29,12 @@ class Map(models.Model):
         on_delete=models.CASCADE,
         related_name='maps'
     )
-    category = models.PositiveSmallIntegerField(db_index=True)
+    category = models.SmallIntegerField(db_index=True)
 
     xml = models.TextField()
     tags = ArrayField(models.CharField(max_length=64), default=list, blank=True)
 
-    embedding = VectorField(dimensions=128)
+    embedding = VectorField(dimensions=128, default=[0.0] * 128)
 
     class Meta:
         db_table = 'map'
@@ -64,7 +64,7 @@ class Map(models.Model):
 # One row per (author, category) with the count of maps
 class AuthorCategoryCounter(models.Model):
     author = models.ForeignKey('Author', on_delete=models.CASCADE, related_name='category_counters')
-    category = models.PositiveSmallIntegerField(db_index=True)
+    category = models.SmallIntegerField(db_index=True)
     map_count = models.IntegerField(default=0)
 
     class Meta:

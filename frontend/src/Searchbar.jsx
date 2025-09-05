@@ -90,12 +90,14 @@ export default function Searchbar({ placeholder = "" }) {
               placeholder={placeholder}
               className="flex-1 px-4 py-1 bg-white focus:outline-none focus:shadow-[inset_0_-2px_0_0_theme(colors.emerald.500)] transition duration-200 rounded-l-xs"
             />
+            {/*
             <CollapsibleTrigger
               className="px-3 py-1 bg-emerald-500 text-white flex items-center cursor-pointer hover:brightness-110 data-[state=open]:brightness-120 data-[state=open]:hover:brightness-110 transition duration-200"
               title={t("search.advanced")}
             >
               <Funnel size="1.25em" />
             </CollapsibleTrigger>
+            */}
             <button
               type="submit"
               className="px-3 py-1 bg-[#4667cf] text-white flex items-center cursor-pointer hover:brightness-110 transition duration-200 rounded-r-xs"
