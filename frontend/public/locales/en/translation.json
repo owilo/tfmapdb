@@ -113,6 +113,13 @@
     "contest_tags": "Contests",
     "other_tags": "Other tags"
   },
+  "categorytabs": {
+    "categories": "Categories",
+    "module_tags": "Modules",
+    "contest_tags": "Contests",
+    "automatic_tags": "Automatic tags",
+    "other_tags": "Other tags"
+  },
   "modules": {
     "hardcamp": "Hardcamp",
     "divinity": "Divinity"

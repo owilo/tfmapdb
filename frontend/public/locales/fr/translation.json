@@ -118,6 +118,13 @@
     "contest_tags": "Concours",
     "other_tags": "Autres tags"
   },
+  "categorytabs": {
+    "categories": "Catégories",
+    "module_tags": "Modules",
+    "contest_tags": "Concours",
+    "automatic_tags": "Tags automatiques",
+    "other_tags": "Autres tags"
+  },
   "modules": {
     "hardcamp": "Hardcamp",
     "divinity": "Divinity"
